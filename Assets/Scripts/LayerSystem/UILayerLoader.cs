@@ -2,23 +2,19 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 internal static class UILayerLoader
 {
     private static Transform _hanger;
     private static Transform _fullScreenHanger;
-    public static void SetHanger(Transform target, Transform fullScreenHanger)
+    
+    public static void SetHanger(Transform hanger, Transform fullScreenHanger)
     {
-        _hanger = target;
+        _hanger = hanger;
         _fullScreenHanger = fullScreenHanger;
     }
-
-    private static RectTransform effectBg;
-    public static void SetEffectBg(RectTransform _effectBg)
-    {
-        effectBg = _effectBg;
-    }
-
+    
     private static readonly List<UILayer> Queues = new List<UILayer>();
     
     public static void Clear(string except = null)
@@ -39,30 +35,21 @@ internal static class UILayerLoader
                 Remove(layer.Index);
         }
     }
-
-    static UILayer _Get(string key)
-    {
-        return Queues.Find(x => x.Index == key);
-    }
     
-    public static T Get<T>()
+    static T Get<T>()
     {
         var target = Queues.Find(x => x.Index == typeof(T).Name);
         if (target != null)
             return (T) Convert.ChangeType(target, typeof(T));
-        else
-        {
-            return default;
-        }
+        return default;
     }
     
-    public static async UniTask<T> LoadAsync<T>(bool insertToTop = false, string key = null, bool loadToFullScreen = false) where T : UILayer
+    public static async UniTask<T> LoadAsync<T>(bool insertToTop = false, bool loadToFullScreen = false) where T : UILayer
     {
-        Transform targetHanger = loadToFullScreen ? _fullScreenHanger : _hanger;
+        var targetHanger = loadToFullScreen ? _fullScreenHanger : _hanger;
         if (targetHanger == null)
             return default;
         string className = typeof(T).Name;
-        var layerName = key != null ? key : className;
         var existed = Get<T>();
         if (existed != null)
         {
@@ -72,11 +59,11 @@ internal static class UILayerLoader
                 var target = existed as GameObject;
                 if (insertToTop)
                 {
-                    target?.transform.SetAsLastSibling();// 在_hanger（saferect）之下
+                    target?.transform.SetAsLastSibling();
                 }
                 else
                 {
-                    target?.transform.SetAsFirstSibling();// 在_hanger（saferect）之上
+                    target?.transform.SetAsFirstSibling();
                 }
             }
             else
@@ -90,48 +77,44 @@ internal static class UILayerLoader
             return existed;
         }
         
-        var uiLayerPrefab = await AddressableLogic.LoadTOnObject<UILayer>(layerName);
+        var layerPrefab = await AddressableLogic.Load<UILayer>(className);
         
-        var t = GameObject.Instantiate(uiLayerPrefab);
-        await t.OnPreOpen();
-        t.Index = className;
-        t.transform.SetParent(targetHanger);
-        t.transform.localPosition = Vector3.zero;
+        var layer = Object.Instantiate(layerPrefab);
+        await layer.OnPreOpen();
+        layer.Index = className;
+        
+        var rt = layer.GetComponent<RectTransform>();
+        
+        rt.SetParent(targetHanger);
+        rt.localPosition = Vector3.zero;
         
         if (loadToFullScreen)
         {
             if (insertToTop)
             {
-                t.transform.SetAsLastSibling();// 在_hanger（saferect）之下
+                rt.SetAsLastSibling();
             }
             else
             {
-                t.transform.SetAsFirstSibling();// 在_hanger（saferect）之上
+                rt.SetAsFirstSibling();
             }
         }
         else
         {
             if (insertToTop)
             {
-                t.transform.SetAsLastSibling();// 在_hanger（saferect）之内
+                rt.SetAsLastSibling();
             }
         }
         
-        var rt = t.GetComponent<RectTransform>();
         rt.anchorMax = Vector2.one;
         rt.anchorMin = Vector2.zero;
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
         rt.localPosition = Vector3.zero;
         rt.localScale = Vector3.one;
-        Queues.Add(t);
-        var returnValue = (T) Convert.ChangeType(t, typeof(T));
-        
-        if (effectBg != null)
-        {
-            effectBg.transform.SetParent(targetHanger);
-            effectBg.transform.SetAsLastSibling();
-        }
+        Queues.Add(layer);
+        var returnValue = (T) Convert.ChangeType(layer, typeof(T));
         
         return returnValue;
     }
@@ -140,11 +123,11 @@ internal static class UILayerLoader
     {
         if (Queues.Count > 0)
         {
-            var uiLayer = Queues[Queues.Count - 1];
+            var uiLayer = Queues[^1];
             if (uiLayer != null)
             {
                 uiLayer.OnDestroy();
-                GameObject.Destroy(uiLayer);
+                Object.Destroy(uiLayer);
             }
             Queues.RemoveAt(Queues.Count - 1);
         }
@@ -152,7 +135,7 @@ internal static class UILayerLoader
 
     public static void Remove<T>()
     {
-        string layerName = typeof(T).Name;
+        var layerName = typeof(T).Name;
         Remove(layerName);
     }
 
@@ -172,7 +155,7 @@ internal static class UILayerLoader
         {
             var layer = Queues[toRemoveIndex];
             if (layer != null)
-                GameObject.Destroy(layer.gameObject);
+                Object.Destroy(layer.gameObject);
             Queues.RemoveAt(toRemoveIndex);
         }
     }

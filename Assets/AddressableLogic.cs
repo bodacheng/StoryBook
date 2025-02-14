@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.ResourceLocations;
 
 public static class AddressableLogic
 {
-    private static readonly IDictionary<string, long> Sizes = new Dictionary<string, long>();
     private static readonly IDictionary<string, List<string>> KeyExists = new Dictionary<string, List<string>>();
-
+    
     public static async UniTask CheckExistedKey(string tag)
     {
         if (KeyExists.ContainsKey(tag))
@@ -33,188 +30,57 @@ public static class AddressableLogic
         }
         else
         {
-            Debug.Log(" error ");
+            Debug.Log("error");
         }
         Addressables.Release(locationHandle);
     }
-
+    
     public static bool CheckKeyExist(string tag, string primaryKey)
     {
-        if (!KeyExists.ContainsKey(tag))
-        {
-            return false;
-        }
-        return KeyExists[tag].Contains(primaryKey);
+        return KeyExists.ContainsKey(tag) && KeyExists[tag].Contains(primaryKey);
     }
     
-    public static async UniTask Essentials()
+    public static async UniTask<T> Load<T>(string key, GameObject memoryReleaseTarget = null, CancellationTokenSource cancellationTokenSource = null)
     {
-        await UniTask.WhenAll(new List<UniTask>()
+        var handle = Addressables.InstantiateAsync(key);
+        if (cancellationTokenSource != null)
         {
-            CheckExistedKey("weapon"),
-            CheckExistedKey("effect"),
-            CheckExistedKey("unit_image")
-        });
-    }
-    
-    public static async UniTask<GameObject> LoadObject(string prefabPathName, Vector3 pos = new Vector3())
-    {
-        var handle = Addressables.InstantiateAsync(prefabPathName, pos, Quaternion.identity);
-        await handle.Task;
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.Log($"Failed to load : {prefabPathName}");
-            Addressables.ReleaseInstance(handle);
-            return default;
+            await handle.ToUniTask(cancellationToken: cancellationTokenSource.Token);
         }
         else
         {
-            var _object = handle.Result; // インスタンス化されたもの
-            _object.AddOnDestroyCallback( () =>
-            {
-                Addressables.ReleaseInstance(handle);
-            });
-            return _object;
+            await handle.Task;
         }
-    }
-    
-    public static async UniTask<T> LoadTOnObject<T>(string prefabPathName)
-    {
-        var handle = Addressables.InstantiateAsync(prefabPathName);
-        await handle.Task;
+        
         if (handle.IsValid() && handle.Status != AsyncOperationStatus.Succeeded)
         {
-            Debug.Log($"Failed to load : {prefabPathName}");
+            Debug.Log($"Failed to load : {key}");
             Addressables.ReleaseInstance(handle);
             return default;
         }
-        else
+        
+        if (!handle.IsValid())
         {
-            if (!handle.IsValid())
-            {
-                return default;
-            }
-            var _object = handle.Result; // インスタンス化されたもの
-            _object.AddOnDestroyCallback( () =>
+            return default;
+        }
+        var handleResult = handle.Result; // インスタンス化されたもの
+        
+        if (memoryReleaseTarget == null)
+        {
+            handleResult.AddOnDestroyCallback( () =>
             {
                 Addressables.ReleaseInstance(handle);
             });
-            var returnValue = _object.GetComponent<T>();
-            return returnValue;
         }
-    }
-    
-    public static async UniTask<T> LoadTOnObject<T>(string prefabPathName, GameObject memoryReleaseTarget = null, CancellationTokenSource _cancellationTokenSource = null)
-    {
-        try
+        else
         {
-            var handle = Addressables.InstantiateAsync(prefabPathName);
-            if (_cancellationTokenSource != null)
+            memoryReleaseTarget.AddOnDestroyCallback( () =>
             {
-                await handle.ToUniTask(cancellationToken: _cancellationTokenSource.Token);
-            }
-            else
-            {
-                await handle.Task;
-            }
-            
-            if (handle.IsValid() && handle.Status != AsyncOperationStatus.Succeeded)
-            {
-                Debug.Log($"Failed to load : {prefabPathName}");
                 Addressables.ReleaseInstance(handle);
-                return default;
-            }
-            else
-            {
-                var _object = handle.Result; // インスタンス化されたもの
-                if (memoryReleaseTarget == null)
-                {
-                    _object.AddOnDestroyCallback( () =>
-                    {
-                        Addressables.ReleaseInstance(handle);
-                    });
-                }
-                else
-                {
-                    memoryReleaseTarget.AddOnDestroyCallback( () =>
-                    {
-                        Addressables.ReleaseInstance(handle);
-                    });
-                }
-                var returnValue = _object.GetComponent<T>();
-                return returnValue;
-            }
+            });
         }
-        catch (Exception e)
-        {
-            Debug.Log(e.Message);
-        }
-        return default;
-    }
-
-    private static readonly List<AsyncOperationHandle> LoadingHandlerList = new List<AsyncOperationHandle>();
-    
-    public static async UniTask<T> LoadT<T>(string prefabPathName, GameObject memoryReleaseTarget = null)
-    {
-        var handle = Addressables.LoadAssetAsync<T>(prefabPathName);
-        await handle.Task;
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.Log($"Failed to load : {prefabPathName}");
-            Addressables.Release(handle);
-            return default;
-        }
-        else
-        {
-            if (memoryReleaseTarget == null)
-            {
-                LoadingHandlerList.Add(handle);
-            }
-            else
-            {
-                memoryReleaseTarget.AddOnDestroyCallback( () =>
-                {
-                    Addressables.ReleaseInstance(handle);
-                });
-            }
-            return handle.Result;
-        }
-    }
-    
-    public static async UniTask<T> LoadT<T>(IResourceLocation location, GameObject memoryReleaseTarget = null)
-    {
-        var handle = Addressables.LoadAssetAsync<T>(location);
-        await handle.Task;
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.Log($"Failed to load : {location}");
-            Addressables.Release(handle);
-            return default;
-        }
-        else
-        {
-            if (memoryReleaseTarget == null)
-            {
-                LoadingHandlerList.Add(handle);
-            }
-            else
-            {
-                memoryReleaseTarget.AddOnDestroyCallback( () =>
-                {
-                    Addressables.ReleaseInstance(handle);
-                });
-            }
-            return handle.Result;
-        }
-    }
-    
-    public static void ReleaseAsyncOperationHandles()
-    {
-        foreach (var handle in LoadingHandlerList)
-        {
-            if (handle.IsValid())
-                Addressables.Release(handle);
-        }
-        LoadingHandlerList.Clear();
+        
+        var returnValue = handleResult.GetComponent<T>();
+        return returnValue;
     }
 }
