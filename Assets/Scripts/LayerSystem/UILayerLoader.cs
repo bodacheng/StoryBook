@@ -133,13 +133,13 @@ internal static class UILayerLoader
         }
     }
 
-    public static void Remove<T>()
+    public static async UniTask Remove<T>()
     {
         var layerName = typeof(T).Name;
-        Remove(layerName);
+        await Remove(layerName);
     }
 
-    static void Remove(string index)
+    static async UniTask Remove(string index)
     {
         var toRemoveIndex = -1;
         for (var i = 0; i < Queues.Count; i++)
@@ -155,7 +155,11 @@ internal static class UILayerLoader
         {
             var layer = Queues[toRemoveIndex];
             if (layer != null)
+            {
+                await layer.OnPreClose();
                 Object.Destroy(layer.gameObject);
+            }
+            
             Queues.RemoveAt(toRemoveIndex);
         }
     }

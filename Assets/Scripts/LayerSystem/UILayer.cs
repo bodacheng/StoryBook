@@ -2,25 +2,24 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum LayerResult
-{
-    Success, Failed, Cancel
-}
 
 public class UILayer : MonoBehaviour
 {
     public string Index { get; set; }
     
     /// <summary>ページを開く前の処理</summary>
-    public virtual UniTask<LayerResult> OnPreOpen()
+    public virtual async UniTask OnPreOpen()
     {
-        return new UniTask<LayerResult>(LayerResult.Success);
     }
     
     /// <summary>ページを閉じる前の処理</summary>
-    protected virtual UniTask<LayerResult> OnPreClose()
+    public virtual async UniTask OnPreClose()
     {
-        return new UniTask<LayerResult>(LayerResult.Success);
+    }
+    
+    public void Pop()
+    {
+        ProcessesRunner.Main.Pop().Forget();
     }
 
     public virtual void OnDestroy()

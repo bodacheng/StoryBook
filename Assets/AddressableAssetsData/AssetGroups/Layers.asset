@@ -23,6 +23,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e5fe81c636f224f5e8267aa51999fd22
+    m_Address: ChapterLayer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 12df451716ad44bbd8c9e1777bc40a30, type: 2}
   m_SchemaSet:

@@ -4,15 +4,10 @@ using CruFramework.Engine.UI;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-public class TitleLayer : UILayer
+public class ChapterLayer : UILayer
 {
     public override async UniTask OnPreOpen()
     {
         await base.OnPreOpen();
-    }
-
-    public void ToChapter()
-    {
-        ProcessesRunner.Main.TrySwitchToStep(MainSceneStep.Chapter).Forget();
     }
 }
