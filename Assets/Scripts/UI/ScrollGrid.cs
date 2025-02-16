@@ -311,8 +311,6 @@ using UnityEngine.UI;
             // アイテムサイズを計算
             CalcItemSize();
             
-            Debug.Log("itemViewCount:"+ itemViewCount);
-            
             // アイテムリスト生成
             items.Clear();
             
@@ -340,10 +338,9 @@ using UnityEngine.UI;
             }
 
             int pageItemViewCount = (itemViewCount.x * itemViewCount.y);
-            pageItemViewCount = pageItemViewCount == 0 ? 1 : pageItemViewCount;
             // ページ数
-            
             int pageViewCount = (items.Count - 1) / pageItemViewCount + 1;
+            
             // 全体のページ数
             if(IsPaging)
             {

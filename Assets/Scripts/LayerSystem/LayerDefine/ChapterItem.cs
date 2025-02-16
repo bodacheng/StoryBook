@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class ChapterItem : ScrollGridItem
 {
-    
+    public class Data : ScrollData
+    {
+        
+    }
     
     protected override void OnSetView(object value)
     {

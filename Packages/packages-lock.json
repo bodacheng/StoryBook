@@ -360,12 +360,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "jp.rudel.cruframework.ui": {
-      "version": "file:jp_rudel_cruframework_ui",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
