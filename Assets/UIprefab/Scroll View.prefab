@@ -395,7 +395,7 @@ RectTransform:
   m_Father: {fileID: 5346795557714787320}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -548,10 +548,10 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   interactable: 1
-  itemPrefab: {fileID: 0}
-  type: 0
+  itemPrefab: {fileID: 9009541943522837971}
+  type: 1
   selectMode: 0
-  alignment: 0
+  alignment: 1
   alignmentReverse: 0
   isLoop: 0
   pagingSnap: 0
@@ -727,7 +727,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2612734219537986851}
   m_Direction: 0
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class ChapterItem : ScrollGridItem
 {
-    public class Data : ScrollData
+    public class Data
     {
         
     }
     
     protected override void OnSetView(object value)
     {
-        gameObject.SetActive(true);
     }
 }
