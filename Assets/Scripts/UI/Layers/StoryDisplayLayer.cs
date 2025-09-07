@@ -18,6 +18,12 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private Button generateStoryButton;
     [SerializeField] private Text progressText;
     
+    [Header("故事参数输入")]
+    [SerializeField] private InputField titleInputField;
+    [SerializeField] private InputField themeInputField;
+    [SerializeField] private InputField pageCountInputField;
+    [SerializeField] private GameObject inputPanel;
+    
     [Header("页面显示设置")]
     [SerializeField] private float pageSpacing = 20f;
     [SerializeField] private Vector2 pageSize = new Vector2(800, 600);
@@ -26,7 +32,7 @@ public class StoryDisplayLayer : UILayer
     private List<GameObject> pageObjects = new List<GameObject>();
     
     // 故事生成相关
-    private System.Func<UniTask<StoryData>> generateStoryFunction;
+    private System.Func<string, string, int, UniTask<StoryData>> generateStoryFunction;
     private bool isGenerating = false;
     
     public override async UniTask OnPreOpen()
@@ -56,7 +62,7 @@ public class StoryDisplayLayer : UILayer
     /// <summary>
     /// 设置故事生成函数
     /// </summary>
-    public void SetGenerateStoryFunction(System.Func<UniTask<StoryData>> generateFunction)
+    public void SetGenerateStoryFunction(System.Func<string, string, int, UniTask<StoryData>> generateFunction)
     {
         generateStoryFunction = generateFunction;
     }
@@ -83,6 +89,10 @@ public class StoryDisplayLayer : UILayer
         if (progressText != null)
             progressText.gameObject.SetActive(false);
         
+        // 隐藏输入面板
+        if (inputPanel != null)
+            inputPanel.SetActive(false);
+        
         UpdateStoryInfo();
         CreateStoryPages();
     }
@@ -95,9 +105,13 @@ public class StoryDisplayLayer : UILayer
         // 清理现有页面
         ClearStoryPages();
         
+        // 显示输入面板
+        if (inputPanel != null)
+            inputPanel.SetActive(true);
+        
         // 显示空状态信息
         if (titleText != null)
-            titleText.text = "点击按钮开始生成故事";
+            titleText.text = "请输入故事参数";
         
         if (themeText != null)
             themeText.text = "准备就绪";
@@ -112,6 +126,41 @@ public class StoryDisplayLayer : UILayer
         // 隐藏进度文本
         if (progressText != null)
             progressText.gameObject.SetActive(false);
+        
+        // 设置默认值
+        SetDefaultInputValues();
+    }
+    
+    /// <summary>
+    /// 设置默认输入值
+    /// </summary>
+    private void SetDefaultInputValues()
+    {
+        if (titleInputField != null)
+            titleInputField.text = "小兔子的冒险";
+        
+        if (themeInputField != null)
+            themeInputField.text = "友谊与勇气";
+        
+        if (pageCountInputField != null)
+            pageCountInputField.text = "3";
+    }
+    
+    /// <summary>
+    /// 获取用户输入的故事参数
+    /// </summary>
+    private (string title, string theme, int pageCount) GetStoryParameters()
+    {
+        string title = titleInputField != null ? titleInputField.text.Trim() : "小兔子的冒险";
+        string theme = themeInputField != null ? themeInputField.text.Trim() : "友谊与勇气";
+        
+        int pageCount = 3;
+        if (pageCountInputField != null && int.TryParse(pageCountInputField.text.Trim(), out int parsedCount))
+        {
+            pageCount = Mathf.Max(1, Mathf.Min(10, parsedCount)); // 限制在1-10页之间
+        }
+        
+        return (title, theme, pageCount);
     }
     
     /// <summary>
@@ -187,6 +236,7 @@ public class StoryDisplayLayer : UILayer
                 new Rect(0, 0, page.illustration.width, page.illustration.height), 
                 new Vector2(0.5f, 0.5f));
             illustrationImage.sprite = sprite;
+            illustrationImage.SetNativeSize();
         }
         
         // 设置页面状态
@@ -294,11 +344,22 @@ public class StoryDisplayLayer : UILayer
         
         try
         {
+            // 获取用户输入的参数
+            var (title, theme, pageCount) = GetStoryParameters();
+            
+            // 验证输入
+            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(theme))
+            {
+                ShowMessage("请输入故事标题和主题");
+                isGenerating = false;
+                return;
+            }
+            
             // 显示生成状态
             ShowGeneratingState();
             
-            // 调用生成函数
-            currentStory = await generateStoryFunction();
+            // 调用生成函数，传递参数
+            currentStory = await generateStoryFunction(title, theme, pageCount);
             
             if (currentStory != null)
             {
