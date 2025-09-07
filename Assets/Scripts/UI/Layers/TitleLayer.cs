@@ -10,4 +10,9 @@ public class TitleLayer : UILayer
     {
         Move(MainSceneStep.PicGenerator);
     }
+    
+    public void MoveToStory()
+    {
+        Move(MainSceneStep.Story);
+    }
 }

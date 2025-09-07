@@ -36,7 +36,7 @@ internal class UILayerLoader
         }
     }
     
-    static T Get<T>()
+    public static T Get<T>() where T : UILayer
     {
         var target = Queues.Find(x => x.Index == typeof(T).Name);
         if (target != null)

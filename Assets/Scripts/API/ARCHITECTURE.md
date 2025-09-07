@@ -37,9 +37,8 @@ UI Layer
 ├── GeminiDemoUI (MonoBehaviour)
 │   ├── GeminiConfig reference
 │   └── GeminiClient instance
-└── StoryGenerator (MonoBehaviour)
-    ├── GeminiConfig reference
-    └── GeminiClient instance
+└── StoryUILayer (MonoBehaviour)
+    └── 直接使用 SceneManager.Instance.GeminiClient
 ```
 
 ## 数据流

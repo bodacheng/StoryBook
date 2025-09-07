@@ -15,27 +15,23 @@
    - 跟踪生成进度和完成状态
    - 提供故事摘要和资源管理
 
-3. **StoryGenerator** - 核心生成逻辑
+3. **StoryUILayer** - 故事生成UI和逻辑
+   - 直接使用 SceneManager.Instance.GeminiClient 进行故事生成
    - 调用Gemini API生成故事大纲
    - 为每页生成文本内容和插画提示词
    - 调用Imagen API生成插画
    - 处理生成过程中的错误和重试
-   - 通过事件通知进度更新
-
-4. **StoryManager** - 业务逻辑管理
-   - 管理故事生成流程
-   - 处理故事的保存和加载
-   - 通过事件与UI层通信
+   - 管理生成进度和状态显示
    - 不包含UI相关代码
 
 ### UI层类
 
-5. **StoryUILayer** - 故事生成UI（继承UILayer）
+4. **StoryUILayer** - 故事生成UI（继承UILayer）
    - 处理故事生成的用户输入
    - 显示生成进度和状态
-   - 订阅StoryManager的事件
+   - 直接调用 GeminiClient 进行故事生成
 
-6. **StoryDisplayLayer** - 故事显示UI（继承UILayer）
+5. **StoryDisplayLayer** - 故事显示UI（继承UILayer）
    - 显示完整的故事内容
    - 提供页面滚动和导航功能
    - 处理故事的保存和分享
@@ -44,17 +40,15 @@
 
 ### 1. 设置组件
 
-#### 业务逻辑层
-1. 在场景中创建一个GameObject，添加`StoryManager`组件
-2. 在Inspector中设置`StoryGenerator`引用
-3. 确保`GeminiClient`和`Imagen4`组件已正确配置API Key
+#### 核心配置
+1. 确保 `SceneManager` 已正确配置 `GeminiConfig`
+2. 确保 `GeminiClient` 和 `Imagen4` 组件已正确配置API Key
 
 #### UI层设置
 1. 创建故事生成UI页面，添加`StoryUILayer`组件
 2. 设置UI组件引用（InputField、Button、Slider等）
-3. 设置`StoryManager`引用
-4. 创建故事显示UI页面，添加`StoryDisplayLayer`组件
-5. 设置故事显示相关的UI组件
+3. 创建故事显示UI页面，添加`StoryDisplayLayer`组件
+4. 设置故事显示相关的UI组件
 
 ### 2. 配置API
 
@@ -100,7 +94,7 @@
 
 可以通过以下方式扩展系统：
 
-1. **自定义风格**：修改`StoryGenerator`中的`storyStyle`参数
+1. **自定义风格**：修改`StoryUILayer`中的`storyStyle`参数
 2. **添加更多主题**：扩展主题选择功能
 3. **导出功能**：添加PDF或其他格式的导出
 4. **分享功能**：添加社交分享功能

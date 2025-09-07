@@ -38,11 +38,13 @@ public class SceneManager : MonoBehaviour
         var chapterProcess = new ChapterProcess();
         var picGeneratorProcessProcess = new PicGeneratorProcessProcess();
         var askAndAnswerProcess = new AskAndAnswerProcess();
+        var storyDisplayProcess = new StoryDisplayProcess();
         
         ProcessesRunner.Main.Clear();
         ProcessesRunner.Main.Add(MainSceneStep.Title, titleProcess);
         ProcessesRunner.Main.Add(MainSceneStep.Chapter, chapterProcess);
         ProcessesRunner.Main.Add(MainSceneStep.AskAndAnswer, askAndAnswerProcess);
         ProcessesRunner.Main.Add(MainSceneStep.PicGenerator, picGeneratorProcessProcess);
+        ProcessesRunner.Main.Add(MainSceneStep.Story, storyDisplayProcess);
     }
 }

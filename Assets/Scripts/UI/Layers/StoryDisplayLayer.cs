@@ -49,11 +49,36 @@ public class StoryDisplayLayer : UILayer
     /// </summary>
     public void DisplayStory(StoryData story)
     {
-        if (story == null) return;
-        
         currentStory = story;
+        
+        if (story == null)
+        {
+            // 显示空状态
+            ShowEmptyState();
+            return;
+        }
+        
         UpdateStoryInfo();
         CreateStoryPages();
+    }
+    
+    /// <summary>
+    /// 显示空状态
+    /// </summary>
+    private void ShowEmptyState()
+    {
+        // 清理现有页面
+        ClearStoryPages();
+        
+        // 显示加载或空状态信息
+        if (titleText != null)
+            titleText.text = "正在生成故事...";
+        
+        if (themeText != null)
+            themeText.text = "请稍候";
+        
+        if (pageCountText != null)
+            pageCountText.text = "准备中...";
     }
     
     /// <summary>
@@ -211,15 +236,23 @@ public class StoryDisplayLayer : UILayer
     {
         try
         {
-            string json = JsonUtility.ToJson(currentStory, true);
-            string fileName = $"{currentStory.title}_{System.DateTime.Now:yyyyMMdd_HHmmss}.json";
-            string filePath = System.IO.Path.Combine(Application.persistentDataPath, fileName);
-            
-            System.IO.File.WriteAllText(filePath, json);
-            Debug.Log($"故事已保存: {fileName}");
-            
-            // 可以显示保存成功的提示
-            ShowMessage("故事保存成功！");
+            if (StoryDataManager.Instance != null)
+            {
+                // 使用数据管理器保存
+                StoryDataManager.Instance.UpdateStory(currentStory);
+                ShowMessage("故事保存成功！");
+            }
+            else
+            {
+                // 备用保存方式
+                string json = JsonUtility.ToJson(currentStory, true);
+                string fileName = $"{currentStory.title}_{System.DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string filePath = System.IO.Path.Combine(Application.persistentDataPath, fileName);
+                
+                System.IO.File.WriteAllText(filePath, json);
+                Debug.Log($"故事已保存: {fileName}");
+                ShowMessage("故事保存成功！");
+            }
         }
         catch (System.Exception e)
         {

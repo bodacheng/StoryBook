@@ -53,7 +53,7 @@ var images = await client.GeneratePic("A cat", 2, "16:9");
 
 ### 3. 更新现有组件
 - `GeminiDemoUI`：现在需要分配 GeminiConfig 而不是 GeminiClient
-- `StoryGenerator`：同样需要分配 GeminiConfig
+- `StoryUILayer`：直接使用 SceneManager.Instance.GeminiClient
 
 ## 优势
 
