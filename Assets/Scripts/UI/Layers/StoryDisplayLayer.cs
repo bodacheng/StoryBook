@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
@@ -9,14 +8,20 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private Text titleText;
     [SerializeField] private Text themeText;
     [SerializeField] private Text pageCountText;
-    [SerializeField] private ScrollRect storyScrollRect;
-    [SerializeField] private Transform storyContainer;
-    [SerializeField] private GameObject pagePrefab;
     [SerializeField] private Button backButton;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button shareButton;
     [SerializeField] private Button generateStoryButton;
     [SerializeField] private Text progressText;
+    
+    [Header("翻页控制")]
+    [SerializeField] private Button prevPageButton;
+    [SerializeField] private Button nextPageButton;
+    [SerializeField] private Text pageInfoText;
+    
+    [Header("单页显示组件")]
+    [SerializeField] private Image currentPageImage;
+    [SerializeField] private Text currentPageText;
     
     [Header("故事参数输入")]
     [SerializeField] private InputField titleInputField;
@@ -25,12 +30,10 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private InputField artStyleInputField;
     [SerializeField] private GameObject inputPanel;
     
-    [Header("页面显示设置")]
-    [SerializeField] private float pageSpacing = 20f;
-    [SerializeField] private Vector2 pageSize = new Vector2(800, 600);
-    
     private StoryData currentStory;
-    private List<GameObject> pageObjects = new List<GameObject>();
+    
+    // 翻页相关
+    private int currentPageIndex = 0;
     
     // 故事生成相关
     private System.Func<string, string, int, string, UniTask<StoryData>> generateStoryFunction;
@@ -58,6 +61,13 @@ public class StoryDisplayLayer : UILayer
         
         if (generateStoryButton != null)
             generateStoryButton.onClick.AddListener(OnGenerateStoryButtonClicked);
+        
+        // 翻页按钮事件
+        if (prevPageButton != null)
+            prevPageButton.onClick.AddListener(OnPrevPageClicked);
+        
+        if (nextPageButton != null)
+            nextPageButton.onClick.AddListener(OnNextPageClicked);
     }
     
     /// <summary>
@@ -94,8 +104,14 @@ public class StoryDisplayLayer : UILayer
         if (inputPanel != null)
             inputPanel.SetActive(false);
         
+        // 显示翻页控制
+        ShowPaginationControls(true);
+        
         UpdateStoryInfo();
-        CreateStoryPages();
+        
+        // 显示第一页
+        currentPageIndex = 0;
+        ShowCurrentPage();
     }
     
     /// <summary>
@@ -103,8 +119,11 @@ public class StoryDisplayLayer : UILayer
     /// </summary>
     private void ShowEmptyState()
     {
-        // 清理现有页面
-        ClearStoryPages();
+        // 隐藏翻页控制
+        ShowPaginationControls(false);
+        
+        // 清空当前页面显示
+        ClearCurrentPageDisplay();
         
         // 显示输入面板
         if (inputPanel != null)
@@ -184,102 +203,26 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 创建故事页面显示
+    /// 清空当前页面显示
     /// </summary>
-    private void CreateStoryPages()
+    private void ClearCurrentPageDisplay()
     {
-        if (storyContainer == null || pagePrefab == null) return;
-        
-        // 清理现有页面
-        ClearStoryPages();
-        
-        // 创建新页面
-        for (int i = 0; i < currentStory.totalPages; i++)
+        if (currentPageImage != null)
         {
-            var page = currentStory.GetPage(i + 1);
-            if (page != null)
-            {
-                CreatePageDisplay(page, i);
-            }
+            currentPageImage.sprite = null;
         }
         
-        // 设置容器大小
-        UpdateContainerSize();
-    }
-    
-    /// <summary>
-    /// 创建单个页面显示
-    /// </summary>
-    private void CreatePageDisplay(StoryPage page, int index)
-    {
-        var pageObj = Instantiate(pagePrefab, storyContainer);
-        pageObjects.Add(pageObj);
-        
-        // 设置页面位置
-        var rectTransform = pageObj.GetComponent<RectTransform>();
-        if (rectTransform != null)
+        if (currentPageText != null)
         {
-            rectTransform.sizeDelta = pageSize;
-            rectTransform.anchoredPosition = new Vector2(0, -index * (pageSize.y + pageSpacing));
+            currentPageText.text = "";
         }
         
-        // 设置页面编号
-        var pageNumberText = pageObj.transform.Find("PageNumber")?.GetComponent<Text>();
-        if (pageNumberText != null)
-            pageNumberText.text = $"第 {page.pageNumber} 页";
-        
-        // 设置页面文本
-        var pageText = pageObj.transform.Find("PageText")?.GetComponent<Text>();
-        if (pageText != null)
-            pageText.text = page.text;
-        
-        // 设置插画
-        var illustrationImage = pageObj.transform.Find("Illustration")?.GetComponent<Image>();
-        if (illustrationImage != null && page.illustration != null)
+        if (pageInfoText != null)
         {
-            var sprite = Sprite.Create(page.illustration, 
-                new Rect(0, 0, page.illustration.width, page.illustration.height), 
-                new Vector2(0.5f, 0.5f));
-            illustrationImage.sprite = sprite;
-            illustrationImage.SetNativeSize();
-        }
-        
-        // 设置页面状态
-        var statusText = pageObj.transform.Find("Status")?.GetComponent<Text>();
-        if (statusText != null)
-        {
-            statusText.text = page.IsComplete() ? "✓ 完成" : "⏳ 生成中...";
-            statusText.color = page.IsComplete() ? Color.green : Color.yellow;
+            pageInfoText.text = "";
         }
     }
     
-    /// <summary>
-    /// 清理故事页面
-    /// </summary>
-    private void ClearStoryPages()
-    {
-        foreach (var pageObj in pageObjects)
-        {
-            if (pageObj != null)
-                Destroy(pageObj);
-        }
-        pageObjects.Clear();
-    }
-    
-    /// <summary>
-    /// 更新容器大小
-    /// </summary>
-    private void UpdateContainerSize()
-    {
-        if (storyContainer == null) return;
-        
-        var containerRect = storyContainer.GetComponent<RectTransform>();
-        if (containerRect != null)
-        {
-            float totalHeight = currentStory.totalPages * (pageSize.y + pageSpacing) - pageSpacing;
-            containerRect.sizeDelta = new Vector2(containerRect.sizeDelta.x, totalHeight);
-        }
-    }
     
     /// <summary>
     /// 返回按钮点击事件
@@ -395,9 +338,6 @@ public class StoryDisplayLayer : UILayer
     /// </summary>
     private void ShowGeneratingState()
     {
-        // 清理现有页面
-        ClearStoryPages();
-        
         // 显示生成中信息
         if (titleText != null)
             titleText.text = "正在生成故事...";
@@ -479,21 +419,6 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 滚动到指定页面
-    /// </summary>
-    public void ScrollToPage(int pageNumber)
-    {
-        if (storyScrollRect == null || pageNumber < 1 || pageNumber > currentStory.totalPages)
-            return;
-        
-        float targetY = (pageNumber - 1) * (pageSize.y + pageSpacing);
-        float maxY = storyContainer.GetComponent<RectTransform>().sizeDelta.y - storyScrollRect.viewport.rect.height;
-        float normalizedY = Mathf.Clamp01(targetY / maxY);
-        
-        storyScrollRect.verticalNormalizedPosition = 1f - normalizedY;
-    }
-    
-    /// <summary>
     /// 更新页面显示（用于实时更新生成进度）
     /// </summary>
     public void UpdatePageDisplay(int pageNumber)
@@ -501,44 +426,129 @@ public class StoryDisplayLayer : UILayer
         if (currentStory == null || pageNumber < 1 || pageNumber > currentStory.totalPages)
             return;
         
-        var page = currentStory.GetPage(pageNumber);
+        // 如果当前显示的就是这个页面，则更新显示
+        if (currentPageIndex + 1 == pageNumber)
+        {
+            ShowCurrentPage();
+        }
+    }
+    
+    /// <summary>
+    /// 显示/隐藏翻页控制
+    /// </summary>
+    private void ShowPaginationControls(bool show)
+    {
+        if (prevPageButton != null)
+            prevPageButton.gameObject.SetActive(show);
+        
+        if (nextPageButton != null)
+            nextPageButton.gameObject.SetActive(show);
+        
+        if (pageInfoText != null)
+            pageInfoText.gameObject.SetActive(show);
+    }
+    
+    /// <summary>
+    /// 显示当前页面
+    /// </summary>
+    private void ShowCurrentPage()
+    {
+        if (currentStory == null) return;
+        
+        var page = currentStory.GetPage(currentPageIndex + 1);
         if (page == null) return;
         
-        int index = pageNumber - 1;
-        if (index < pageObjects.Count && pageObjects[index] != null)
+        // 更新页面文本
+        if (currentPageText != null)
+            currentPageText.text = page.text;
+        
+        // 更新页面图像
+        if (currentPageImage != null)
         {
-            // 更新页面内容
-            var pageObj = pageObjects[index];
-            
-            // 更新文本
-            var pageText = pageObj.transform.Find("PageText")?.GetComponent<Text>();
-            if (pageText != null)
-                pageText.text = page.text;
-            
-            // 更新插画
-            var illustrationImage = pageObj.transform.Find("Illustration")?.GetComponent<Image>();
-            if (illustrationImage != null && page.illustration != null)
+            if (page.illustration != null)
             {
                 var sprite = Sprite.Create(page.illustration, 
                     new Rect(0, 0, page.illustration.width, page.illustration.height), 
                     new Vector2(0.5f, 0.5f));
-                illustrationImage.sprite = sprite;
+                currentPageImage.sprite = sprite;
+                currentPageImage.SetNativeSize();
             }
-            
-            // 更新状态
-            var statusText = pageObj.transform.Find("Status")?.GetComponent<Text>();
-            if (statusText != null)
+            else
             {
-                statusText.text = page.IsComplete() ? "✓ 完成" : "⏳ 生成中...";
-                statusText.color = page.IsComplete() ? Color.green : Color.yellow;
+                currentPageImage.sprite = null;
             }
+        }
+        
+        // 更新翻页按钮状态
+        UpdatePaginationButtons();
+        
+        // 更新页面信息显示
+        UpdateCurrentPageInfo();
+    }
+    
+    /// <summary>
+    /// 更新翻页按钮状态
+    /// </summary>
+    private void UpdatePaginationButtons()
+    {
+        if (prevPageButton != null)
+            prevPageButton.interactable = currentPageIndex > 0;
+        
+        if (nextPageButton != null)
+            nextPageButton.interactable = currentPageIndex < currentStory.totalPages - 1;
+    }
+    
+    /// <summary>
+    /// 更新当前页面信息显示
+    /// </summary>
+    private void UpdateCurrentPageInfo()
+    {
+        if (pageInfoText != null && currentStory != null)
+        {
+            pageInfoText.text = $"第 {currentPageIndex + 1} 页 / 共 {currentStory.totalPages} 页";
         }
     }
     
+    /// <summary>
+    /// 上一页按钮点击事件
+    /// </summary>
+    private void OnPrevPageClicked()
+    {
+        if (currentPageIndex > 0)
+        {
+            currentPageIndex--;
+            ShowCurrentPage();
+        }
+    }
+    
+    /// <summary>
+    /// 下一页按钮点击事件
+    /// </summary>
+    private void OnNextPageClicked()
+    {
+        if (currentPageIndex < currentStory.totalPages - 1)
+        {
+            currentPageIndex++;
+            ShowCurrentPage();
+        }
+    }
+    
+    /// <summary>
+    /// 跳转到指定页面
+    /// </summary>
+    public void GoToPage(int pageNumber)
+    {
+        if (currentStory == null || pageNumber < 1 || pageNumber > currentStory.totalPages)
+            return;
+        
+        currentPageIndex = pageNumber - 1;
+        ShowCurrentPage();
+    }
+
     public override void OnDestroy()
     {
         base.OnDestroy();
-        ClearStoryPages();
+        ClearCurrentPageDisplay();
     }
 }
 
