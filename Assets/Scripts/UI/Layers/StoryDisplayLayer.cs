@@ -22,6 +22,7 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private InputField titleInputField;
     [SerializeField] private InputField themeInputField;
     [SerializeField] private InputField pageCountInputField;
+    [SerializeField] private InputField artStyleInputField;
     [SerializeField] private GameObject inputPanel;
     
     [Header("页面显示设置")]
@@ -32,7 +33,7 @@ public class StoryDisplayLayer : UILayer
     private List<GameObject> pageObjects = new List<GameObject>();
     
     // 故事生成相关
-    private System.Func<string, string, int, UniTask<StoryData>> generateStoryFunction;
+    private System.Func<string, string, int, string, UniTask<StoryData>> generateStoryFunction;
     private bool isGenerating = false;
     
     public override async UniTask OnPreOpen()
@@ -62,7 +63,7 @@ public class StoryDisplayLayer : UILayer
     /// <summary>
     /// 设置故事生成函数
     /// </summary>
-    public void SetGenerateStoryFunction(System.Func<string, string, int, UniTask<StoryData>> generateFunction)
+    public void SetGenerateStoryFunction(System.Func<string, string, int, string, UniTask<StoryData>> generateFunction)
     {
         generateStoryFunction = generateFunction;
     }
@@ -144,15 +145,19 @@ public class StoryDisplayLayer : UILayer
         
         if (pageCountInputField != null)
             pageCountInputField.text = "3";
+        
+        if (artStyleInputField != null)
+            artStyleInputField.text = "童话";
     }
     
     /// <summary>
     /// 获取用户输入的故事参数
     /// </summary>
-    private (string title, string theme, int pageCount) GetStoryParameters()
+    private (string title, string theme, int pageCount, string artStyle) GetStoryParameters()
     {
         string title = titleInputField != null ? titleInputField.text.Trim() : "小兔子的冒险";
         string theme = themeInputField != null ? themeInputField.text.Trim() : "友谊与勇气";
+        string artStyle = artStyleInputField != null ? artStyleInputField.text.Trim() : "童话";
         
         int pageCount = 3;
         if (pageCountInputField != null && int.TryParse(pageCountInputField.text.Trim(), out int parsedCount))
@@ -160,7 +165,7 @@ public class StoryDisplayLayer : UILayer
             pageCount = Mathf.Max(1, Mathf.Min(10, parsedCount)); // 限制在1-10页之间
         }
         
-        return (title, theme, pageCount);
+        return (title, theme, pageCount, artStyle);
     }
     
     /// <summary>
@@ -345,7 +350,7 @@ public class StoryDisplayLayer : UILayer
         try
         {
             // 获取用户输入的参数
-            var (title, theme, pageCount) = GetStoryParameters();
+            var (title, theme, pageCount, artStyle) = GetStoryParameters();
             
             // 验证输入
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(theme))
@@ -359,7 +364,7 @@ public class StoryDisplayLayer : UILayer
             ShowGeneratingState();
             
             // 调用生成函数，传递参数
-            currentStory = await generateStoryFunction(title, theme, pageCount);
+            currentStory = await generateStoryFunction(title, theme, pageCount, artStyle);
             
             if (currentStory != null)
             {

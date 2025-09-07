@@ -28,7 +28,13 @@
 - 设置Content Type为 "Integer Number"
 - 将其拖拽到 `StoryDisplayLayer` 的 `pageCountInputField` 字段
 
-### 5. 进度文本 (Progress Text)
+### 5. 作画风格输入字段 (Art Style Input Field)
+- 在InputPanel下创建一个InputField
+- 命名为 "ArtStyleInputField"
+- 设置Placeholder文本为 "作画风格 (如：童话、哥特、性感等)"
+- 将其拖拽到 `StoryDisplayLayer` 的 `artStyleInputField` 字段
+
+### 6. 进度文本 (Progress Text)
 - 创建一个Text组件
 - 命名为 "ProgressText"
 - 初始时设置为非激活状态
@@ -38,7 +44,7 @@
 
 ### 新的工作流程
 1. 用户进入故事显示界面时，会看到输入面板
-2. 用户可以输入自定义的故事标题、主题和页数
+2. 用户可以输入自定义的故事标题、主题、页数和作画风格
 3. 点击"生成故事"按钮后，系统会使用用户输入的参数生成故事
 4. 生成过程中会显示进度信息
 5. 生成完成后，输入面板会隐藏，显示生成的故事内容
@@ -52,20 +58,23 @@
 - 标题默认值：小兔子的冒险
 - 主题默认值：友谊与勇气
 - 页数默认值：3
+- 作画风格默认值：童话
 
 ## 代码变更总结
 
 1. **StoryDisplayLayer.cs**
-   - 添加了输入字段的UI组件引用
-   - 修改了生成函数类型，现在接受三个参数：title, theme, pageCount
+   - 添加了输入字段的UI组件引用，包括新的作画风格输入字段
+   - 修改了生成函数类型，现在接受四个参数：title, theme, pageCount, artStyle
    - 添加了参数获取和验证逻辑
    - 更新了UI状态管理
 
 2. **StoryDisplayProcess.cs**
-   - 修改了GenerateStoryAsync方法，现在接受参数
+   - 修改了GenerateStoryAsync方法，现在接受四个参数
    - 使用StoryGenerationService.GenerateStoryAsync而不是GenerateSampleStoryAsync
 
 3. **StoryGenerationService.cs**
-   - 无需修改，因为GenerateStoryAsync方法已经支持参数
+   - 修改了GenerateStoryAsync方法，添加了artStyle参数
+   - 更新了GenerateIllustrationPromptAsync方法，在插画提示词中包含作画风格
+   - 修改了GenerateSampleStoryAsync方法，添加默认的作画风格参数
 
 这样的设计让用户可以完全自定义故事的内容，而不是使用写死的参数。

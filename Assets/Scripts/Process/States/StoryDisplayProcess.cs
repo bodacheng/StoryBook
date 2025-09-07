@@ -56,7 +56,7 @@ public class StoryDisplayProcess : MainSceneProcess
     /// <summary>
     /// 生成故事（供StoryDisplayLayer调用）
     /// </summary>
-    private async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount)
+    private async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount, string artStyle)
     {
         if (storyGenerationService == null)
         {
@@ -67,7 +67,7 @@ public class StoryDisplayProcess : MainSceneProcess
         try
         {
             // 使用传入的参数生成故事
-            currentStory = await storyGenerationService.GenerateStoryAsync(title, theme, pageCount, (progress, message) =>
+            currentStory = await storyGenerationService.GenerateStoryAsync(title, theme, pageCount, artStyle, (progress, message) =>
             {
                 Debug.Log($"Story Generation Progress: {progress:P0} - {message}");
                 // 这里可以更新UI显示进度

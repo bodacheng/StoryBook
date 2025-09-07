@@ -23,9 +23,10 @@ public class StoryGenerationService
     /// <param name="title">故事标题</param>
     /// <param name="theme">故事主题</param>
     /// <param name="pageCount">页数</param>
+    /// <param name="artStyle">作画风格</param>
     /// <param name="onProgress">进度回调</param>
     /// <returns>生成的故事数据</returns>
-    public async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount, 
+    public async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount, string artStyle,
         Action<float, string> onProgress = null)
     {
         if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(theme) || pageCount <= 0)
@@ -48,7 +49,7 @@ public class StoryGenerationService
                 var progress = 0.1f + (0.8f * i / pageCount);
                 onProgress?.Invoke(progress, $"正在生成第 {i} 页内容...");
                 
-                await GeneratePageContentAsync(storyData, i, outline);
+                await GeneratePageContentAsync(storyData, i, outline, artStyle);
             }
             
             // 3. 完成
@@ -90,7 +91,7 @@ public class StoryGenerationService
     /// <summary>
     /// 生成单页内容
     /// </summary>
-    private async UniTask GeneratePageContentAsync(StoryData storyData, int pageNumber, string outline)
+    private async UniTask GeneratePageContentAsync(StoryData storyData, int pageNumber, string outline, string artStyle)
     {
         try
         {
@@ -98,7 +99,7 @@ public class StoryGenerationService
             var pageText = await GeneratePageTextAsync(storyData.title, storyData.theme, pageNumber, storyData.totalPages, outline);
             
             // 2. 生成插画提示词
-            var illustrationPrompt = await GenerateIllustrationPromptAsync(storyData.title, storyData.theme, pageNumber, pageText);
+            var illustrationPrompt = await GenerateIllustrationPromptAsync(storyData.title, storyData.theme, pageNumber, pageText, artStyle);
             
             // 3. 生成插画
             var illustrations = await geminiClient.GeneratePic(illustrationPrompt, 1, "16:9");
@@ -147,10 +148,9 @@ public class StoryGenerationService
 
 要求：
 1. 内容要符合故事主题和整体风格
-2. 适合儿童阅读，语言生动有趣
-3. 长度适中，适合一页显示（约100-200字）
-4. 与前后页内容连贯
-5. 用中文写作
+2. 长度适中，适合一页显示（约100-200字）
+3. 与前后页内容连贯
+4. 用日文写作
 
 请直接输出页面文本内容，不要包含其他说明：";
 
@@ -161,20 +161,22 @@ public class StoryGenerationService
     /// <summary>
     /// 生成插画提示词
     /// </summary>
-    private async UniTask<string> GenerateIllustrationPromptAsync(string title, string theme, int pageNumber, string pageText)
+    private async UniTask<string> GenerateIllustrationPromptAsync(string title, string theme, int pageNumber, string pageText, string artStyle)
     {
         var prompt = $@"请为以下故事页面生成一个详细的插画提示词：
 
 故事标题：{title}
 故事主题：{theme}
 页面内容：{pageText}
+作画风格：{artStyle}
 
 要求：
 1. 插画要生动有趣，适合儿童
 2. 风格要统一，色彩丰富
 3. 要能准确表达页面内容
 4. 用英文描述，适合AI图像生成
-5. 包含艺术风格描述（如：cartoon style, watercolor, digital art等）
+5. 必须体现指定的作画风格：{artStyle}
+6. 包含艺术风格描述（如：cartoon style, watercolor, digital art等）
 
 请直接输出插画提示词：";
 
@@ -187,6 +189,6 @@ public class StoryGenerationService
     /// </summary>
     public async UniTask<StoryData> GenerateSampleStoryAsync(Action<float, string> onProgress = null)
     {
-        return await GenerateStoryAsync("小兔子的冒险", "友谊与勇气", 3, onProgress);
+        return await GenerateStoryAsync("小兔子的冒险", "友谊与勇气", 3, "童话", onProgress);
     }
 }
