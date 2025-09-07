@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: Default Local Group
   m_EditorClassIdentifier: 
   m_GroupName: Default Local Group
-  m_Data:
-    m_SerializedData: []
   m_GUID: 2ef2c7100aedd4362be8b80a75a96ab5
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 7985f2eabe21a419c9fe99a9542940ee
+    m_Address: Assets/GeminiConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 12df451716ad44bbd8c9e1777bc40a30, type: 2}
   m_SchemaSet:
