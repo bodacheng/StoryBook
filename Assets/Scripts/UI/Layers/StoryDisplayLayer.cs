@@ -15,6 +15,8 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private Button backButton;
     [SerializeField] private Button saveButton;
     [SerializeField] private Button shareButton;
+    [SerializeField] private Button generateStoryButton;
+    [SerializeField] private Text progressText;
     
     [Header("页面显示设置")]
     [SerializeField] private float pageSpacing = 20f;
@@ -22,6 +24,10 @@ public class StoryDisplayLayer : UILayer
     
     private StoryData currentStory;
     private List<GameObject> pageObjects = new List<GameObject>();
+    
+    // 故事生成相关
+    private System.Func<UniTask<StoryData>> generateStoryFunction;
+    private bool isGenerating = false;
     
     public override async UniTask OnPreOpen()
     {
@@ -42,6 +48,17 @@ public class StoryDisplayLayer : UILayer
         
         if (shareButton != null)
             shareButton.onClick.AddListener(OnShareButtonClicked);
+        
+        if (generateStoryButton != null)
+            generateStoryButton.onClick.AddListener(OnGenerateStoryButtonClicked);
+    }
+    
+    /// <summary>
+    /// 设置故事生成函数
+    /// </summary>
+    public void SetGenerateStoryFunction(System.Func<UniTask<StoryData>> generateFunction)
+    {
+        generateStoryFunction = generateFunction;
     }
     
     /// <summary>
@@ -58,6 +75,14 @@ public class StoryDisplayLayer : UILayer
             return;
         }
         
+        // 隐藏生成按钮
+        if (generateStoryButton != null)
+            generateStoryButton.gameObject.SetActive(false);
+        
+        // 隐藏进度文本
+        if (progressText != null)
+            progressText.gameObject.SetActive(false);
+        
         UpdateStoryInfo();
         CreateStoryPages();
     }
@@ -70,15 +95,23 @@ public class StoryDisplayLayer : UILayer
         // 清理现有页面
         ClearStoryPages();
         
-        // 显示加载或空状态信息
+        // 显示空状态信息
         if (titleText != null)
-            titleText.text = "正在生成故事...";
+            titleText.text = "点击按钮开始生成故事";
         
         if (themeText != null)
-            themeText.text = "请稍候";
+            themeText.text = "准备就绪";
         
         if (pageCountText != null)
-            pageCountText.text = "准备中...";
+            pageCountText.text = "等待生成...";
+        
+        // 显示生成按钮
+        if (generateStoryButton != null)
+            generateStoryButton.gameObject.SetActive(true);
+        
+        // 隐藏进度文本
+        if (progressText != null)
+            progressText.gameObject.SetActive(false);
     }
     
     /// <summary>
@@ -227,6 +260,98 @@ public class StoryDisplayLayer : UILayer
         }
         
         ShareStory();
+    }
+    
+    /// <summary>
+    /// 生成故事按钮点击事件
+    /// </summary>
+    private async void OnGenerateStoryButtonClicked()
+    {
+        if (isGenerating)
+        {
+            Debug.LogWarning("正在生成故事中，请稍候...");
+            return;
+        }
+        
+        if (generateStoryFunction == null)
+        {
+            Debug.LogError("故事生成函数未设置！");
+            ShowMessage("故事生成功能未初始化");
+            return;
+        }
+        
+        await GenerateStoryAsync();
+    }
+    
+    /// <summary>
+    /// 异步生成故事
+    /// </summary>
+    private async UniTask GenerateStoryAsync()
+    {
+        if (isGenerating) return;
+        
+        isGenerating = true;
+        
+        try
+        {
+            // 显示生成状态
+            ShowGeneratingState();
+            
+            // 调用生成函数
+            currentStory = await generateStoryFunction();
+            
+            if (currentStory != null)
+            {
+                // 显示生成的故事
+                DisplayStory(currentStory);
+                ShowMessage("故事生成完成！");
+            }
+            else
+            {
+                ShowMessage("故事生成失败，请重试");
+                ShowEmptyState();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"生成故事时发生错误: {ex.Message}");
+            ShowMessage($"生成失败: {ex.Message}");
+            ShowEmptyState();
+        }
+        finally
+        {
+            isGenerating = false;
+        }
+    }
+    
+    /// <summary>
+    /// 显示生成中状态
+    /// </summary>
+    private void ShowGeneratingState()
+    {
+        // 清理现有页面
+        ClearStoryPages();
+        
+        // 显示生成中信息
+        if (titleText != null)
+            titleText.text = "正在生成故事...";
+        
+        if (themeText != null)
+            themeText.text = "请稍候";
+        
+        if (pageCountText != null)
+            pageCountText.text = "生成中...";
+        
+        // 隐藏生成按钮
+        if (generateStoryButton != null)
+            generateStoryButton.gameObject.SetActive(false);
+        
+        // 显示进度文本
+        if (progressText != null)
+        {
+            progressText.gameObject.SetActive(true);
+            progressText.text = "正在生成故事内容，请稍候...";
+        }
     }
     
     /// <summary>

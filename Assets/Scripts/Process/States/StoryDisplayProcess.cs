@@ -27,8 +27,13 @@ public class StoryDisplayProcess : MainSceneProcess
         // 加载显示层
         layer = await UILayerLoader.LoadAsync<StoryDisplayLayer>();
         
-        // 生成并显示故事
-        await GenerateAndDisplayStory();
+        // 设置生成故事函数到显示层
+        if (layer != null)
+        {
+            layer.SetGenerateStoryFunction(GenerateStoryAsync);
+            // 显示空状态，等待用户点击生成按钮
+            layer.DisplayStory(null);
+        }
     }
     
     public override async UniTask ProcessEnd()
@@ -49,21 +54,18 @@ public class StoryDisplayProcess : MainSceneProcess
     }
     
     /// <summary>
-    /// 生成并显示故事
+    /// 生成故事（供StoryDisplayLayer调用）
     /// </summary>
-    private async UniTask GenerateAndDisplayStory()
+    private async UniTask<StoryData> GenerateStoryAsync()
     {
-        if (storyGenerationService == null || layer == null)
+        if (storyGenerationService == null)
         {
-            Debug.LogError("Story generation service or layer is not initialized!");
-            return;
+            Debug.LogError("Story generation service is not initialized!");
+            return null;
         }
         
         try
         {
-            // 显示加载状态
-            layer.DisplayStory(null); // 显示空状态
-            
             // 生成示例故事（实际项目中可以从用户输入或其他地方获取参数）
             currentStory = await storyGenerationService.GenerateSampleStoryAsync((progress, message) =>
             {
@@ -71,52 +73,22 @@ public class StoryDisplayProcess : MainSceneProcess
                 // 这里可以更新UI显示进度
             });
             
-            // 显示生成的故事
-            if (currentStory != null)
+            // 保存到数据管理器
+            if (currentStory != null && StoryDataManager.Instance != null)
             {
-                layer.DisplayStory(currentStory);
-                
-                // 保存到数据管理器
-                if (StoryDataManager.Instance != null)
-                {
-                    StoryDataManager.Instance.AddStory(currentStory);
-                }
-                
+                StoryDataManager.Instance.AddStory(currentStory);
                 Debug.Log($"Story generated successfully: {currentStory.GetSummary()}");
             }
+            
+            return currentStory;
         }
         catch (System.Exception ex)
         {
             Debug.LogError($"Failed to generate story: {ex.Message}");
-            // 显示错误状态
-            ShowErrorState($"故事生成失败: {ex.Message}");
+            return null;
         }
     }
     
-    /// <summary>
-    /// 显示错误状态
-    /// </summary>
-    private void ShowErrorState(string errorMessage)
-    {
-        if (layer != null)
-        {
-            // 创建一个错误状态的故事数据
-            var errorStory = new StoryData("生成失败", "错误", 1);
-            errorStory.UpdatePage(1, errorMessage, null, "");
-            layer.DisplayStory(errorStory);
-        }
-    }
-    
-    /// <summary>
-    /// 重新生成故事
-    /// </summary>
-    public async UniTask RegenerateStoryAsync()
-    {
-        if (storyGenerationService != null && layer != null)
-        {
-            await GenerateAndDisplayStory();
-        }
-    }
     
     /// <summary>
     /// 获取当前故事数据
