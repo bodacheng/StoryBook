@@ -77,9 +77,7 @@ internal class UILayerLoader
             return existed;
         }
         
-        var layerPrefab = await AddressableLogic.Load<UILayer>(className);
-        
-        var layer = Object.Instantiate(layerPrefab);
+        var layer = await AddressableLogic.Load<UILayer>(className);
         await layer.OnPreOpen();
         layer.Index = className;
         var rt = layer.GetComponent<RectTransform>();
