@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GeminiConfig
   m_EditorClassIdentifier: 
   apiKey: AIzaSyCU5dxk2ZzNyQwyRfug5pBdYElalV22eTo
-  model: gemini-2.5-flash
+  model: gemini-2.5-flash-lite
   defaultTimeoutMs: 20000
   imageTimeoutMs: 60000
   defaultImageCount: 1
