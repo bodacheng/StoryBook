@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 
 public class StoryDisplayLayer : UILayer
 {
-    [Header("UI组件")]
+    [Header("UI Components")]
     [SerializeField] private Text titleText;
     [SerializeField] private Text themeText;
     [SerializeField] private Text pageCountText;
@@ -14,16 +14,16 @@ public class StoryDisplayLayer : UILayer
     [SerializeField] private Button generateStoryButton;
     [SerializeField] private Text progressText;
     
-    [Header("翻页控制")]
+    [Header("Pagination Controls")]
     [SerializeField] private Button prevPageButton;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private Text pageInfoText;
     
-    [Header("单页显示组件")]
+    [Header("Single Page Display Components")]
     [SerializeField] private Image currentPageImage;
     [SerializeField] private Text currentPageText;
     
-    [Header("故事参数输入")]
+    [Header("Story Parameter Input")]
     [SerializeField] private InputField titleInputField;
     [SerializeField] private InputField themeInputField;
     [SerializeField] private InputField pageCountInputField;
@@ -32,10 +32,10 @@ public class StoryDisplayLayer : UILayer
     
     private StoryData currentStory;
     
-    // 翻页相关
+    // Pagination related
     private int currentPageIndex = 0;
     
-    // 故事生成相关
+    // Story generation related
     private System.Func<string, string, int, string, UniTask<StoryData>> generateStoryFunction;
     private bool isGenerating = false;
     
@@ -46,7 +46,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 初始化UI
+    /// Initialize UI
     /// </summary>
     private void InitializeUI()
     {
@@ -62,7 +62,7 @@ public class StoryDisplayLayer : UILayer
         if (generateStoryButton != null)
             generateStoryButton.onClick.AddListener(OnGenerateStoryButtonClicked);
         
-        // 翻页按钮事件
+        // Pagination button events
         if (prevPageButton != null)
             prevPageButton.onClick.AddListener(OnPrevPageClicked);
         
@@ -71,7 +71,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 设置故事生成函数
+    /// Set story generation function
     /// </summary>
     public void SetGenerateStoryFunction(System.Func<string, string, int, string, UniTask<StoryData>> generateFunction)
     {
@@ -79,7 +79,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 显示故事数据
+    /// Display story data
     /// </summary>
     public void DisplayStory(StoryData story)
     {
@@ -87,108 +87,108 @@ public class StoryDisplayLayer : UILayer
         
         if (story == null)
         {
-            // 显示空状态
+            // Show empty state
             ShowEmptyState();
             return;
         }
         
-        // 隐藏生成按钮
+        // Hide generate button
         if (generateStoryButton != null)
             generateStoryButton.gameObject.SetActive(false);
         
-        // 隐藏进度文本
+        // Hide progress text
         if (progressText != null)
             progressText.gameObject.SetActive(false);
         
-        // 隐藏输入面板
+        // Hide input panel
         if (inputPanel != null)
             inputPanel.SetActive(false);
         
-        // 显示翻页控制
+        // Show pagination controls
         ShowPaginationControls(true);
         
         UpdateStoryInfo();
         
-        // 显示第一页
+        // Show first page
         currentPageIndex = 0;
         ShowCurrentPage();
     }
     
     /// <summary>
-    /// 显示空状态
+    /// Show empty state
     /// </summary>
     private void ShowEmptyState()
     {
-        // 隐藏翻页控制
+        // Hide pagination controls
         ShowPaginationControls(false);
         
-        // 清空当前页面显示
+        // Clear current page display
         ClearCurrentPageDisplay();
         
-        // 显示输入面板
+        // Show input panel
         if (inputPanel != null)
             inputPanel.SetActive(true);
         
-        // 显示空状态信息
+        // Show empty state information
         if (titleText != null)
-            titleText.text = "请输入故事参数";
+            titleText.text = "Please enter story parameters";
         
         if (themeText != null)
-            themeText.text = "准备就绪";
+            themeText.text = "Ready";
         
         if (pageCountText != null)
-            pageCountText.text = "等待生成...";
+            pageCountText.text = "Waiting for generation...";
         
-        // 显示生成按钮
+        // Show generate button
         if (generateStoryButton != null)
             generateStoryButton.gameObject.SetActive(true);
         
-        // 隐藏进度文本
+        // Hide progress text
         if (progressText != null)
             progressText.gameObject.SetActive(false);
         
-        // 设置默认值
+        // Set default values
         SetDefaultInputValues();
     }
     
     /// <summary>
-    /// 设置默认输入值
+    /// Set default input values
     /// </summary>
     private void SetDefaultInputValues()
     {
         if (titleInputField != null)
-            titleInputField.text = "小兔子的冒险";
+            titleInputField.text = "The Little Rabbit's Adventure";
         
         if (themeInputField != null)
-            themeInputField.text = "友谊与勇气";
+            themeInputField.text = "Friendship and Courage";
         
         if (pageCountInputField != null)
             pageCountInputField.text = "3";
         
         if (artStyleInputField != null)
-            artStyleInputField.text = "童话";
+            artStyleInputField.text = "Fairy Tale";
     }
     
     /// <summary>
-    /// 获取用户输入的故事参数
+    /// Get user input story parameters
     /// </summary>
     private (string title, string theme, int pageCount, string artStyle) GetStoryParameters()
     {
-        string title = titleInputField != null ? titleInputField.text.Trim() : "小兔子的冒险";
-        string theme = themeInputField != null ? themeInputField.text.Trim() : "友谊与勇气";
-        string artStyle = artStyleInputField != null ? artStyleInputField.text.Trim() : "童话";
+        string title = titleInputField != null ? titleInputField.text.Trim() : "The Little Rabbit's Adventure";
+        string theme = themeInputField != null ? themeInputField.text.Trim() : "Friendship and Courage";
+        string artStyle = artStyleInputField != null ? artStyleInputField.text.Trim() : "Fairy Tale";
         
         int pageCount = 3;
         if (pageCountInputField != null && int.TryParse(pageCountInputField.text.Trim(), out int parsedCount))
         {
-            pageCount = Mathf.Max(1, Mathf.Min(10, parsedCount)); // 限制在1-10页之间
+            pageCount = Mathf.Max(1, Mathf.Min(10, parsedCount)); // Limit between 1-10 pages
         }
         
         return (title, theme, pageCount, artStyle);
     }
     
     /// <summary>
-    /// 更新故事基本信息显示
+    /// Update story basic information display
     /// </summary>
     private void UpdateStoryInfo()
     {
@@ -196,14 +196,14 @@ public class StoryDisplayLayer : UILayer
             titleText.text = currentStory.title;
         
         if (themeText != null)
-            themeText.text = $"主题: {currentStory.theme}";
+            themeText.text = $"Theme: {currentStory.theme}";
         
         if (pageCountText != null)
-            pageCountText.text = $"共 {currentStory.totalPages} 页";
+            pageCountText.text = $"Total {currentStory.totalPages} pages";
     }
     
     /// <summary>
-    /// 清空当前页面显示
+    /// Clear current page display
     /// </summary>
     private void ClearCurrentPageDisplay()
     {
@@ -225,7 +225,7 @@ public class StoryDisplayLayer : UILayer
     
     
     /// <summary>
-    /// 返回按钮点击事件
+    /// Back button click event
     /// </summary>
     private void OnBackButtonClicked()
     {
@@ -233,13 +233,13 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 保存按钮点击事件
+    /// Save button click event
     /// </summary>
     private void OnSaveButtonClicked()
     {
         if (currentStory == null)
         {
-            Debug.LogWarning("没有可保存的故事");
+            Debug.LogWarning("No story to save");
             return;
         }
         
@@ -247,13 +247,13 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 分享按钮点击事件
+    /// Share button click event
     /// </summary>
     private void OnShareButtonClicked()
     {
         if (currentStory == null)
         {
-            Debug.LogWarning("没有可分享的故事");
+            Debug.LogWarning("No story to share");
             return;
         }
         
@@ -261,20 +261,20 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 生成故事按钮点击事件
+    /// Generate story button click event
     /// </summary>
     private async void OnGenerateStoryButtonClicked()
     {
         if (isGenerating)
         {
-            Debug.LogWarning("正在生成故事中，请稍候...");
+            Debug.LogWarning("Story is being generated, please wait...");
             return;
         }
         
         if (generateStoryFunction == null)
         {
-            Debug.LogError("故事生成函数未设置！");
-            ShowMessage("故事生成功能未初始化");
+            Debug.LogError("Story generation function not set!");
+            ShowMessage("Story generation feature not initialized");
             return;
         }
         
@@ -282,7 +282,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 异步生成故事
+    /// Asynchronously generate story
     /// </summary>
     private async UniTask GenerateStoryAsync()
     {
@@ -292,39 +292,39 @@ public class StoryDisplayLayer : UILayer
         
         try
         {
-            // 获取用户输入的参数
+            // Get user input parameters
             var (title, theme, pageCount, artStyle) = GetStoryParameters();
             
-            // 验证输入
+            // Validate input
             if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(theme))
             {
-                ShowMessage("请输入故事标题和主题");
+                ShowMessage("Please enter story title and theme");
                 isGenerating = false;
                 return;
             }
             
-            // 显示生成状态
+            // Show generating state
             ShowGeneratingState();
             
-            // 调用生成函数，传递参数
+            // Call generation function with parameters
             currentStory = await generateStoryFunction(title, theme, pageCount, artStyle);
             
             if (currentStory != null)
             {
-                // 显示生成的故事
+                // Display generated story
                 DisplayStory(currentStory);
-                ShowMessage("故事生成完成！");
+                ShowMessage("Story generation completed!");
             }
             else
             {
-                ShowMessage("故事生成失败，请重试");
+                ShowMessage("Story generation failed, please retry");
                 ShowEmptyState();
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"生成故事时发生错误: {ex.Message}");
-            ShowMessage($"生成失败: {ex.Message}");
+            Debug.LogError($"Error occurred while generating story: {ex.Message}");
+            ShowMessage($"Generation failed: {ex.Message}");
             ShowEmptyState();
         }
         finally
@@ -334,34 +334,34 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 显示生成中状态
+    /// Show generating state
     /// </summary>
     private void ShowGeneratingState()
     {
-        // 显示生成中信息
+        // Show generating information
         if (titleText != null)
-            titleText.text = "正在生成故事...";
+            titleText.text = "Generating story...";
         
         if (themeText != null)
-            themeText.text = "请稍候";
+            themeText.text = "Please wait";
         
         if (pageCountText != null)
-            pageCountText.text = "生成中...";
+            pageCountText.text = "Generating...";
         
-        // 隐藏生成按钮
+        // Hide generate button
         if (generateStoryButton != null)
             generateStoryButton.gameObject.SetActive(false);
         
-        // 显示进度文本
+        // Show progress text
         if (progressText != null)
         {
             progressText.gameObject.SetActive(true);
-            progressText.text = "正在生成故事内容，请稍候...";
+            progressText.text = "Generating story content, please wait...";
         }
     }
     
     /// <summary>
-    /// 保存故事
+    /// Save story
     /// </summary>
     private void SaveStory()
     {
@@ -369,64 +369,64 @@ public class StoryDisplayLayer : UILayer
         {
             if (StoryDataManager.Instance != null)
             {
-                // 使用数据管理器保存
+                // Use data manager to save
                 StoryDataManager.Instance.UpdateStory(currentStory);
-                ShowMessage("故事保存成功！");
+                ShowMessage("Story saved successfully!");
             }
             else
             {
-                // 备用保存方式
+                // Fallback save method
                 string json = JsonUtility.ToJson(currentStory, true);
                 string fileName = $"{currentStory.title}_{System.DateTime.Now:yyyyMMdd_HHmmss}.json";
                 string filePath = System.IO.Path.Combine(Application.persistentDataPath, fileName);
                 
                 System.IO.File.WriteAllText(filePath, json);
-                Debug.Log($"故事已保存: {fileName}");
-                ShowMessage("故事保存成功！");
+                Debug.Log($"Story saved: {fileName}");
+                ShowMessage("Story saved successfully!");
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"保存失败: {e.Message}");
-            ShowMessage($"保存失败: {e.Message}");
+            Debug.LogError($"Save failed: {e.Message}");
+            ShowMessage($"Save failed: {e.Message}");
         }
     }
     
     /// <summary>
-    /// 分享故事
+    /// Share story
     /// </summary>
     private void ShareStory()
     {
         if (currentStory == null) return;
         
-        string shareText = $"我创建了一个有趣的故事：{currentStory.title}\n";
-        shareText += $"主题：{currentStory.theme}\n";
-        shareText += $"共{currentStory.totalPages}页\n";
-        shareText += "快来一起阅读吧！";
+        string shareText = $"I created an interesting story: {currentStory.title}\n";
+        shareText += $"Theme: {currentStory.theme}\n";
+        shareText += $"Total {currentStory.totalPages} pages\n";
+        shareText += "Come read it together!";
         
-        // 这里可以集成具体的分享功能
-        Debug.Log($"分享内容: {shareText}");
-        ShowMessage("分享功能开发中...");
+        // Here you can integrate specific sharing functionality
+        Debug.Log($"Share content: {shareText}");
+        ShowMessage("Sharing feature under development...");
     }
     
     /// <summary>
-    /// 显示消息
+    /// Show message
     /// </summary>
     private void ShowMessage(string message)
     {
         Debug.Log($"StoryDisplayLayer: {message}");
-        // 这里可以显示Toast或其他UI提示
+        // Here you can show Toast or other UI prompts
     }
     
     /// <summary>
-    /// 更新页面显示（用于实时更新生成进度）
+    /// Update page display (for real-time generation progress updates)
     /// </summary>
     public void UpdatePageDisplay(int pageNumber)
     {
         if (currentStory == null || pageNumber < 1 || pageNumber > currentStory.totalPages)
             return;
         
-        // 如果当前显示的就是这个页面，则更新显示
+        // If currently displaying this page, update the display
         if (currentPageIndex + 1 == pageNumber)
         {
             ShowCurrentPage();
@@ -434,7 +434,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 显示/隐藏翻页控制
+    /// Show/hide pagination controls
     /// </summary>
     private void ShowPaginationControls(bool show)
     {
@@ -449,7 +449,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 显示当前页面
+    /// Show current page
     /// </summary>
     private void ShowCurrentPage()
     {
@@ -458,11 +458,11 @@ public class StoryDisplayLayer : UILayer
         var page = currentStory.GetPage(currentPageIndex + 1);
         if (page == null) return;
         
-        // 更新页面文本
+        // Update page text
         if (currentPageText != null)
             currentPageText.text = page.text;
         
-        // 更新页面图像
+        // Update page image
         if (currentPageImage != null)
         {
             if (page.illustration != null)
@@ -479,15 +479,15 @@ public class StoryDisplayLayer : UILayer
             }
         }
         
-        // 更新翻页按钮状态
+        // Update pagination button state
         UpdatePaginationButtons();
         
-        // 更新页面信息显示
+        // Update page information display
         UpdateCurrentPageInfo();
     }
     
     /// <summary>
-    /// 更新翻页按钮状态
+    /// Update pagination button state
     /// </summary>
     private void UpdatePaginationButtons()
     {
@@ -499,18 +499,18 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 更新当前页面信息显示
+    /// Update current page information display
     /// </summary>
     private void UpdateCurrentPageInfo()
     {
         if (pageInfoText != null && currentStory != null)
         {
-            pageInfoText.text = $"第 {currentPageIndex + 1} 页 / 共 {currentStory.totalPages} 页";
+            pageInfoText.text = $"Page {currentPageIndex + 1} / {currentStory.totalPages}";
         }
     }
     
     /// <summary>
-    /// 上一页按钮点击事件
+    /// Previous page button click event
     /// </summary>
     private void OnPrevPageClicked()
     {
@@ -522,7 +522,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 下一页按钮点击事件
+    /// Next page button click event
     /// </summary>
     private void OnNextPageClicked()
     {
@@ -534,7 +534,7 @@ public class StoryDisplayLayer : UILayer
     }
     
     /// <summary>
-    /// 跳转到指定页面
+    /// Jump to specified page
     /// </summary>
     public void GoToPage(int pageNumber)
     {

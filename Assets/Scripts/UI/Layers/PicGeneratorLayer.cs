@@ -12,7 +12,7 @@ public class PicGeneratorLayer : UILayer
         state.text = "Generating…";
         var tex = await SceneManager.Instance.GeminiClient.GeneratePic(askInputField.text);
         preview.texture = tex[0];
-        //preview.SetNativeSize(); // 或自己设尺寸
+        //preview.SetNativeSize(); // Or set size manually
         state.text = "Done";
     }
 }

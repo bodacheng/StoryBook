@@ -21,21 +21,21 @@ public class GeminiClient
     [Serializable] class Part { public string text; }
     [Serializable] class Content { public string role = "user"; public Part[] parts; }
     [Serializable] class RequestBody { public Content[] contents; }
-    // 响应结构（只取我们要的那一小部分）
+    // Response structure (only taking the part we need)
     [Serializable] class ResponsePart { public string text; }
     [Serializable] class ResponseContent { public ResponsePart[] parts; }
     [Serializable] class Candidate { public ResponseContent content; }
     [Serializable] class ResponseRoot { public Candidate[] candidates; }
     
     /// <summary>
-    /// 发送一个"问题"，返回 Gemini 的文本回答
+    /// Send a "question" and return Gemini's text response
     /// </summary>
     public System.Threading.Tasks.Task<string> AskAsync(string question, int? timeoutMs = null)
     {
         var tcs = new System.Threading.Tasks.TaskCompletionSource<string>();
         var actualTimeout = timeoutMs ?? config.DefaultTimeoutMs;
 
-        // 构造请求体
+        // Construct request body
         var body = new RequestBody {
             contents = new [] {
                 new Content {
@@ -54,7 +54,7 @@ public class GeminiClient
         req.SetRequestHeader("Content-Type", "application/json");
         req.timeout = Mathf.CeilToInt(actualTimeout / 1000f);
 
-        // 使用MonoBehaviourRunner来执行协程
+        // Use MonoBehaviourRunner to execute coroutine
         MonoBehaviourRunner.Instance.StartCoroutine(Send(req, tcs));
         return tcs.Task;
     }

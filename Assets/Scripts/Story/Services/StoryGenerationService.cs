@@ -5,8 +5,8 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
-/// 故事生成服务
-/// 使用GeminiClient生成故事内容和插画
+/// Story Generation Service
+/// Uses GeminiClient to generate story content and illustrations
 /// </summary>
 public class StoryGenerationService
 {
@@ -18,14 +18,14 @@ public class StoryGenerationService
     }
     
     /// <summary>
-    /// 生成完整的故事
+    /// Generate complete story
     /// </summary>
-    /// <param name="title">故事标题</param>
-    /// <param name="theme">故事主题</param>
-    /// <param name="pageCount">页数</param>
-    /// <param name="artStyle">作画风格</param>
-    /// <param name="onProgress">进度回调</param>
-    /// <returns>生成的故事数据</returns>
+    /// <param name="title">Story title</param>
+    /// <param name="theme">Story theme</param>
+    /// <param name="pageCount">Number of pages</param>
+    /// <param name="artStyle">Art style</param>
+    /// <param name="onProgress">Progress callback</param>
+    /// <returns>Generated story data</returns>
     public async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount, string artStyle,
         Action<float, string> onProgress = null)
     {
@@ -34,54 +34,54 @@ public class StoryGenerationService
             throw new ArgumentException("Invalid story parameters");
         }
         
-        // 创建故事数据
+        // Create story data
         var storyData = new StoryData(title, theme, pageCount);
         
         try
         {
-            // 1. 生成故事大纲
-            onProgress?.Invoke(0.1f, "正在生成故事大纲...");
+            // 1. Generate story outline
+            onProgress?.Invoke(0.1f, "Generating story outline...");
             var outline = await GenerateStoryOutlineAsync(title, theme, pageCount);
             
-            // 2. 为每页生成内容
+            // 2. Generate content for each page
             for (int i = 1; i <= pageCount; i++)
             {
                 var progress = 0.1f + (0.8f * i / pageCount);
-                onProgress?.Invoke(progress, $"正在生成第 {i} 页内容...");
+                onProgress?.Invoke(progress, $"Generating page {i} content...");
                 
                 await GeneratePageContentAsync(storyData, i, outline, artStyle);
             }
             
-            // 3. 完成
-            onProgress?.Invoke(1.0f, "故事生成完成！");
+            // 3. Complete
+            onProgress?.Invoke(1.0f, "Story generation completed!");
             return storyData;
         }
         catch (Exception ex)
         {
-            Debug.LogError($"故事生成失败: {ex.Message}");
+            Debug.LogError($"Story generation failed: {ex.Message}");
             throw;
         }
     }
     
     /// <summary>
-    /// 生成故事大纲
+    /// Generate story outline
     /// </summary>
     private async UniTask<string> GenerateStoryOutlineAsync(string title, string theme, int pageCount)
     {
-        var prompt = $@"请为以下故事创建一个详细的大纲：
+        var prompt = $@"Please create a detailed outline for the following story:
 
-标题：{title}
-主题：{theme}
-页数：{pageCount}
+Title: {title}
+Theme: {theme}
+Pages: {pageCount}
 
-请为每一页提供一个简短的描述，包括：
-1. 该页的主要情节
-2. 适合该页的插画描述
-3. 页面之间的连贯性
+Please provide a brief description for each page, including:
+1. The main plot of that page
+2. A suitable illustration description for that page
+3. Continuity between pages
 
-请用中文回答，格式如下：
-第1页：[情节描述] | [插画描述]
-第2页：[情节描述] | [插画描述]
+Please respond in English, in the following format:
+Page 1: [Plot description] | [Illustration description]
+Page 2: [Plot description] | [Illustration description]
 ...";
 
         var response = await geminiClient.AskAsync(prompt);
@@ -89,29 +89,29 @@ public class StoryGenerationService
     }
     
     /// <summary>
-    /// 生成单页内容
+    /// Generate single page content
     /// </summary>
     private async UniTask GeneratePageContentAsync(StoryData storyData, int pageNumber, string outline, string artStyle)
     {
         try
         {
-            // 1. 生成页面文本
+            // 1. Generate page text
             var pageText = await GeneratePageTextAsync(storyData.title, storyData.theme, pageNumber, storyData.totalPages, outline);
             
-            // 2. 生成插画提示词
+            // 2. Generate illustration prompt
             var illustrationPrompt = await GenerateIllustrationPromptAsync(storyData.title, storyData.theme, pageNumber, pageText, artStyle);
             
-            // 3. 生成插画
+            // 3. Generate illustration
             var illustrations = await geminiClient.GeneratePic(illustrationPrompt, 1, "16:9");
             
-            // 4. 更新页面数据
+            // 4. Update page data
             if (illustrations != null && illustrations.Length > 0)
             {
                 storyData.UpdatePage(pageNumber, pageText, illustrations[0], illustrationPrompt);
             }
             else
             {
-                // 如果插画生成失败，只更新文本
+                // If illustration generation fails, only update text
                 var page = storyData.GetPage(pageNumber);
                 if (page != null)
                 {
@@ -121,74 +121,74 @@ public class StoryGenerationService
         }
         catch (Exception ex)
         {
-            Debug.LogError($"生成第 {pageNumber} 页内容失败: {ex.Message}");
-            // 即使失败也要设置基本文本
+            Debug.LogError($"Failed to generate content for page {pageNumber}: {ex.Message}");
+            // Even if failed, set basic text
             var page = storyData.GetPage(pageNumber);
             if (page != null)
             {
-                page.SetText($"第 {pageNumber} 页内容生成失败，请重试。");
+                page.SetText($"Page {pageNumber} content generation failed, please retry.");
             }
         }
     }
     
     /// <summary>
-    /// 生成页面文本内容
+    /// Generate page text content
     /// </summary>
     private async UniTask<string> GeneratePageTextAsync(string title, string theme, int pageNumber, int totalPages, string outline)
     {
-        var prompt = $@"请为以下故事生成第 {pageNumber} 页的详细文本内容：
+        var prompt = $@"Please generate detailed text content for page {pageNumber} of the following story:
 
-故事标题：{title}
-故事主题：{theme}
-总页数：{totalPages}
-当前页数：{pageNumber}
+Story Title: {title}
+Story Theme: {theme}
+Total Pages: {totalPages}
+Current Page: {pageNumber}
 
-故事大纲：
+Story Outline:
 {outline}
 
-要求：
-1. 内容要符合故事主题和整体风格
-2. 长度适中，适合一页显示（约50-100字）
-3. 与前后页内容连贯
-4. 用日文写作
+Requirements:
+1. Content should match the story theme and overall style
+2. Appropriate length for one page display (about 50-100 words)
+3. Coherent with previous and next pages
+4. Write in English
 
-请直接输出页面文本内容，不要包含其他说明：";
+Please output the page text content directly, without any other explanations:";
 
         var response = await geminiClient.AskAsync(prompt);
-        return response?.Trim() ?? $"第 {pageNumber} 页内容";
+        return response?.Trim() ?? $"Page {pageNumber} content";
     }
     
     /// <summary>
-    /// 生成插画提示词
+    /// Generate illustration prompt
     /// </summary>
     private async UniTask<string> GenerateIllustrationPromptAsync(string title, string theme, int pageNumber, string pageText, string artStyle)
     {
-        var prompt = $@"请为以下故事页面生成一个详细的插画提示词：
+        var prompt = $@"Please generate a detailed illustration prompt for the following story page:
 
-故事标题：{title}
-故事主题：{theme}
-页面内容：{pageText}
-作画风格：{artStyle}
+Story Title: {title}
+Story Theme: {theme}
+Page Content: {pageText}
+Art Style: {artStyle}
 
-要求：
-1. 插画要生动有趣，适合儿童
-2. 风格要统一，色彩丰富
-3. 要能准确表达页面内容
-4. 用英文描述，适合AI图像生成
-5. 必须体现指定的作画风格：{artStyle}
-6. 包含艺术风格描述（如：cartoon style, watercolor, digital art等）
+Requirements:
+1. Illustration should be vivid and interesting, suitable for children
+2. Style should be consistent with rich colors
+3. Should accurately express the page content
+4. Describe in English, suitable for AI image generation
+5. Must reflect the specified art style: {artStyle}
+6. Include art style descriptions (such as: cartoon style, watercolor, digital art, etc.)
 
-请直接输出插画提示词：";
+Please output the illustration prompt directly:";
 
         var response = await geminiClient.AskAsync(prompt);
         return response?.Trim() ?? $"A beautiful illustration for page {pageNumber} of {title}";
     }
     
     /// <summary>
-    /// 生成示例故事（用于测试）
+    /// Generate sample story (for testing)
     /// </summary>
     public async UniTask<StoryData> GenerateSampleStoryAsync(Action<float, string> onProgress = null)
     {
-        return await GenerateStoryAsync("小兔子的冒险", "友谊与勇气", 3, "童话", onProgress);
+        return await GenerateStoryAsync("The Little Rabbit's Adventure", "Friendship and Courage", 3, "Fairy Tale", onProgress);
     }
 }

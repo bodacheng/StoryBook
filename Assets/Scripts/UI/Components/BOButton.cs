@@ -19,7 +19,7 @@ using UnityEditor.UI;
     }
 
 /// <summary>
-/// 这个按钮扩展的bug：如果你设置Time.timeScale = 0，这个按钮会失效
+/// Bug in this button extension: If you set Time.timeScale = 0, this button will become ineffective
 /// </summary>
     public class BOButton : Button
     {
@@ -276,11 +276,11 @@ using UnityEditor.UI;
         }
 
         /// <summary>
-        /// onClick にタスクを設定する
+        /// Set task to onClick
         /// </summary>
         /// <param name="action">イベント</param>
-        /// <param name="waitTask">タスクの終了待ちの間非活性にするか</param>
-        /// <param name="endInteractable">タスクの終了後のinteractableに設定する値</param>
+        /// <param name="waitTask">Whether to deactivate while waiting for task completion</param>
+        /// <param name="endInteractable">Value to set for interactable after task completion</param>
         public void SetListener(System.Func<UniTask> action, bool waitTask = true, bool endInteractable = true)
         {
             onClick.RemoveAllListeners();

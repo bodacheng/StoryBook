@@ -14,7 +14,7 @@ public class StoryDisplayProcess : MainSceneProcess
     
     public override async UniTask ProcessEnter()
     {
-        // 初始化故事生成服务
+        // Initialize story generation service
         if (SceneManager.Instance?.GeminiClient != null)
         {
             storyGenerationService = new StoryGenerationService(SceneManager.Instance.GeminiClient);
@@ -24,37 +24,37 @@ public class StoryDisplayProcess : MainSceneProcess
             Debug.LogError("SceneManager.Instance.GeminiClient is null! Cannot initialize story generation service.");
         }
         
-        // 加载显示层
+        // Load display layer
         layer = await UILayerLoader.LoadAsync<StoryDisplayLayer>();
         
-        // 设置生成故事函数到显示层
+        // Set story generation function to display layer
         if (layer != null)
         {
             layer.SetGenerateStoryFunction(GenerateStoryAsync);
-            // 显示空状态，等待用户点击生成按钮
+            // Show empty state, wait for user to click generate button
             layer.DisplayStory(null);
         }
     }
     
     public override async UniTask ProcessEnd()
     {
-        // 清理当前故事数据
+        // Clean up current story data
         if (currentStory != null)
         {
             currentStory.Cleanup();
             currentStory = null;
         }
         
-        // 移除显示层
+        // Remove display layer
         await UILayerLoader.Remove<StoryDisplayLayer>();
         layer = null;
         
-        // 清理服务
+        // Clean up service
         storyGenerationService = null;
     }
     
     /// <summary>
-    /// 生成故事（供StoryDisplayLayer调用）
+    /// Generate story (called by StoryDisplayLayer)
     /// </summary>
     private async UniTask<StoryData> GenerateStoryAsync(string title, string theme, int pageCount, string artStyle)
     {
@@ -66,14 +66,14 @@ public class StoryDisplayProcess : MainSceneProcess
         
         try
         {
-            // 使用传入的参数生成故事
+            // Generate story using passed parameters
             currentStory = await storyGenerationService.GenerateStoryAsync(title, theme, pageCount, artStyle, (progress, message) =>
             {
                 Debug.Log($"Story Generation Progress: {progress:P0} - {message}");
-                // 这里可以更新UI显示进度
+                // Here you can update UI progress display
             });
             
-            // 保存到数据管理器
+            // Save to data manager
             if (currentStory != null && StoryDataManager.Instance != null)
             {
                 StoryDataManager.Instance.AddStory(currentStory);
@@ -91,7 +91,7 @@ public class StoryDisplayProcess : MainSceneProcess
     
     
     /// <summary>
-    /// 获取当前故事数据
+    /// Get current story data
     /// </summary>
     public StoryData GetCurrentStory()
     {

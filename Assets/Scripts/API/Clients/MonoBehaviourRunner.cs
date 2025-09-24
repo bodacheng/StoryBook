@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 用于在非MonoBehaviour类中执行协程的单例
+/// Singleton for executing coroutines in non-MonoBehaviour classes
 /// </summary>
 public class MonoBehaviourRunner : MonoBehaviour
 {

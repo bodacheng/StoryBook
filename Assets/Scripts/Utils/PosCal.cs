@@ -13,17 +13,17 @@ public static class PosCal
     {
         Rect safeArea = Screen.safeArea;
         
-        // 获取 Canvas 缩放因子
+        // Get Canvas scale factor
         float scaleFactor = _canvas.scaleFactor;
 
-        // 将 safeArea 的宽高转换为 Canvas 的坐标
+        // Convert safeArea width and height to Canvas coordinates
         float safeAreaWidthInCanvas = safeArea.width / scaleFactor;
         float safeAreaHeightInCanvas = safeArea.height / scaleFactor;
         return (safeAreaWidthInCanvas, safeAreaHeightInCanvas);
     }
     
     /// <summary>
-    /// 这个函数在目前所用的地方为什么能得到正确的值我们压根不理解。主要不理解rect.transform.position到底是什么
+    /// We don't understand why this function gets the correct value in the places it's used. Mainly don't understand what rect.transform.position actually is
     /// </summary>
     /// <param name="refC"></param>
     /// <param name="rect"></param>
@@ -38,10 +38,10 @@ public static class PosCal
         return worldPos;
     }
     
-    /// 这个是一律和ConvertAnchorPos配合使用，rectPos指的是UI元素在Canvas内的anchoredPosition，它并不等同于Screen Position。
-    /// 前者的最大值是Canvas的长和宽，后者的最大值是设备分辨率
+    /// This is always used together with ConvertAnchorPos, rectPos refers to the anchoredPosition of UI elements within Canvas, which is not equivalent to Screen Position.
+    /// The maximum value of the former is the length and width of Canvas, the maximum value of the latter is device resolution
     /// </param>
-    /// <param name="rectPos"> 这个值是UI元素的坐标，指的应该是我们希望把某个特效给定到的位置 </param>
+    /// <param name="rectPos"> This value is the UI element coordinate, which should refer to the position where we want to place some effect </param>
     /// <param name="zOffset"></param>
     /// <returns></returns>
     public static Vector3 GetWorldPos(Camera refC, Vector3 rectPos, float zOffset)

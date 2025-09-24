@@ -4,14 +4,14 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// 故事数据管理器
-/// 负责故事的存储、加载和管理
+/// Story Data Manager
+/// Responsible for story storage, loading and management
 /// </summary>
 public class StoryDataManager : MonoBehaviour
 {
     public static StoryDataManager Instance { get; private set; }
     
-    [Header("存储设置")]
+    [Header("Storage Settings")]
     [SerializeField] private string storiesFolder = "Stories";
     [SerializeField] private string fileExtension = ".json";
     
@@ -37,25 +37,25 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 初始化管理器
+    /// Initialize manager
     /// </summary>
     private void Initialize()
     {
-        // 设置存储路径
+        // Set storage path
         storiesPath = Path.Combine(Application.persistentDataPath, storiesFolder);
         
-        // 确保目录存在
+        // Ensure directory exists
         if (!Directory.Exists(storiesPath))
         {
             Directory.CreateDirectory(storiesPath);
         }
         
-        // 加载现有故事
+        // Load existing stories
         LoadAllStories();
     }
     
     /// <summary>
-    /// 添加新故事
+    /// Add new story
     /// </summary>
     public void AddStory(StoryData story)
     {
@@ -69,7 +69,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 更新故事
+    /// Update story
     /// </summary>
     public void UpdateStory(StoryData story)
     {
@@ -87,7 +87,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 删除故事
+    /// Remove story
     /// </summary>
     public void RemoveStory(StoryData story)
     {
@@ -104,7 +104,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 获取所有故事
+    /// Get all stories
     /// </summary>
     public List<StoryData> GetAllStories()
     {
@@ -112,7 +112,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 根据标题查找故事
+    /// Find story by title
     /// </summary>
     public StoryData GetStoryByTitle(string title)
     {
@@ -120,7 +120,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 获取故事数量
+    /// Get story count
     /// </summary>
     public int GetStoryCount()
     {
@@ -128,7 +128,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 保存故事到文件
+    /// Save story to file
     /// </summary>
     private void SaveStory(StoryData story)
     {
@@ -149,7 +149,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 从文件加载故事
+    /// Load story from file
     /// </summary>
     private StoryData LoadStory(string fileName)
     {
@@ -173,7 +173,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 加载所有故事
+    /// Load all stories
     /// </summary>
     private void LoadAllStories()
     {
@@ -204,7 +204,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 删除故事文件
+    /// Delete story file
     /// </summary>
     private void DeleteStoryFile(StoryData story)
     {
@@ -226,7 +226,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 获取故事文件名
+    /// Get story file name
     /// </summary>
     private string GetStoryFileName(StoryData story)
     {
@@ -236,7 +236,7 @@ public class StoryDataManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 清理所有数据
+    /// Clear all data
     /// </summary>
     public void ClearAllStories()
     {
@@ -247,7 +247,7 @@ public class StoryDataManager : MonoBehaviour
         
         stories.Clear();
         
-        // 删除所有文件
+        // Delete all files
         try
         {
             if (Directory.Exists(storiesPath))
@@ -269,7 +269,7 @@ public class StoryDataManager : MonoBehaviour
     
     void OnDestroy()
     {
-        // 保存所有故事
+        // Save all stories
         foreach (var story in stories)
         {
             SaveStory(story);

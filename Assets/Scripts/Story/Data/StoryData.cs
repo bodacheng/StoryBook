@@ -5,16 +5,16 @@ using UnityEngine;
 [System.Serializable]
 public class StoryData
 {
-    [Header("故事基本信息")]
+    [Header("Story Basic Information")]
     public string title;
     public string theme;
     public int totalPages;
     public DateTime createdTime;
     
-    [Header("故事页面")]
+    [Header("Story Pages")]
     public List<StoryPage> pages;
     
-    [Header("生成状态")]
+    [Header("Generation Status")]
     public bool isComplete;
     public float generationProgress;
     
@@ -28,7 +28,7 @@ public class StoryData
         isComplete = false;
         generationProgress = 0f;
         
-        // 初始化页面
+        // Initialize pages
         for (int i = 0; i < totalPages; i++)
         {
             pages.Add(new StoryPage(i + 1));
@@ -36,7 +36,7 @@ public class StoryData
     }
     
     /// <summary>
-    /// 获取指定页码的页面
+    /// Get page by page number
     /// </summary>
     public StoryPage GetPage(int pageNumber)
     {
@@ -46,7 +46,7 @@ public class StoryData
     }
     
     /// <summary>
-    /// 更新页面内容
+    /// Update page content
     /// </summary>
     public void UpdatePage(int pageNumber, string text, Texture2D illustration, string illustrationPrompt)
     {
@@ -60,7 +60,7 @@ public class StoryData
     }
     
     /// <summary>
-    /// 更新生成进度
+    /// Update generation progress
     /// </summary>
     private void UpdateProgress()
     {
@@ -76,18 +76,18 @@ public class StoryData
     }
     
     /// <summary>
-    /// 获取故事摘要
+    /// Get story summary
     /// </summary>
     public string GetSummary()
     {
-        var summary = $"标题: {title}\n主题: {theme}\n页数: {totalPages}\n";
-        summary += $"进度: {Mathf.RoundToInt(generationProgress * 100)}%\n";
-        summary += $"创建时间: {createdTime:yyyy-MM-dd HH:mm:ss}";
+        var summary = $"Title: {title}\nTheme: {theme}\nPages: {totalPages}\n";
+        summary += $"Progress: {Mathf.RoundToInt(generationProgress * 100)}%\n";
+        summary += $"Created: {createdTime:yyyy-MM-dd HH:mm:ss}";
         return summary;
     }
     
     /// <summary>
-    /// 清理所有资源
+    /// Cleanup all resources
     /// </summary>
     public void Cleanup()
     {

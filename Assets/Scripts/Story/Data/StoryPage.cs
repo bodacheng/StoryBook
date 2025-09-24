@@ -3,12 +3,12 @@ using UnityEngine;
 [System.Serializable]
 public class StoryPage
 {
-    [Header("页面内容")]
+    [Header("Page Content")]
     public int pageNumber;
     public string text;
     public Texture2D illustration;
     
-    [Header("生成信息")]
+    [Header("Generation Info")]
     public string illustrationPrompt;
     public bool isGenerated;
     
@@ -22,7 +22,7 @@ public class StoryPage
     }
     
     /// <summary>
-    /// 设置页面文本内容
+    /// Set page text content
     /// </summary>
     public void SetText(string pageText)
     {
@@ -30,7 +30,7 @@ public class StoryPage
     }
     
     /// <summary>
-    /// 设置插画
+    /// Set illustration
     /// </summary>
     public void SetIllustration(Texture2D image, string prompt)
     {
@@ -40,7 +40,7 @@ public class StoryPage
     }
     
     /// <summary>
-    /// 检查页面是否完整生成
+    /// Check if page is completely generated
     /// </summary>
     public bool IsComplete()
     {
@@ -48,7 +48,7 @@ public class StoryPage
     }
     
     /// <summary>
-    /// 清理资源
+    /// Cleanup resources
     /// </summary>
     public void Cleanup()
     {
