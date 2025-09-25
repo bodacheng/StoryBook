@@ -14,7 +14,7 @@ public class DALLEService
         this.config = config;
     }
     
-    [Serializable] class DALLERequest { public string model; public string prompt; public int n = 1; public string size; public string quality; }
+    [Serializable] class DALLERequest { public string model; public string prompt; public int n = 1; }
     [Serializable] class DALLEData { public string url; public string revised_prompt; }
     [Serializable] class DALLEResponse { public DALLEData[] data; }
 
@@ -23,18 +23,13 @@ public class DALLEService
         var actualTimeout = timeoutMs ?? config.ImageTimeoutMs;
         var actualCount = Mathf.Clamp(count, 1, 4);
         
-        // 将style和size作为prompt的一部分
-        var enhancedPrompt = $"{prompt}, {config.DefaultStyle} style, {size} aspect ratio";
-        
-        // 使用默认的API支持的size
-        var apiSize = config.DefaultSize;
+        // 将所有参数作为prompt的一部分，确保模型兼容性
+        var enhancedPrompt = $"{prompt}, {config.DefaultStyle} style, {size} aspect ratio, {config.DefaultQuality} quality";
         
         var body = new DALLERequest {
             model = config.ImageModel,
             prompt = enhancedPrompt,
-            n = actualCount,
-            size = apiSize,
-            quality = config.DefaultQuality
+            n = actualCount
         };
         var json = JsonUtility.ToJson(body);
         var url = "https://api.openai.com/v1/images/generations";

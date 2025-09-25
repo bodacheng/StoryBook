@@ -10,12 +10,12 @@ public class OpenAIConfig : ScriptableObject
     
     [Header("Request Settings")]
     [SerializeField] private int defaultTimeoutMs = 20000;
-    [SerializeField] private int imageTimeoutMs = 60000;
+    [SerializeField] private int imageTimeoutMs = 100000;
     
     [Header("Image Generation Settings")]
     [SerializeField] private int defaultImageCount = 1;
-    [SerializeField] private string defaultSize = "1024x1024";
-    [SerializeField] private string defaultQuality = "standard";
+    [SerializeField] private string defaultSize = "1792x1024";
+    [SerializeField] private string defaultQuality = "auto";
     [SerializeField] private string defaultStyle = "vivid";
     
     // Public properties
