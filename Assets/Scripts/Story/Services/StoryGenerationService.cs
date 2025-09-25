@@ -6,15 +6,15 @@ using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Story Generation Service
-/// Uses GeminiClient to generate story content and illustrations
+/// Uses AI Service Manager to generate story content and illustrations
 /// </summary>
 public class StoryGenerationService
 {
-    private readonly GeminiClient geminiClient;
+    private readonly AIServiceManager aiServiceManager;
     
-    public StoryGenerationService(GeminiClient client)
+    public StoryGenerationService(AIServiceManager aiServiceManager)
     {
-        geminiClient = client ?? throw new ArgumentNullException(nameof(client));
+        this.aiServiceManager = aiServiceManager ?? throw new ArgumentNullException(nameof(aiServiceManager));
     }
     
     /// <summary>
@@ -84,7 +84,7 @@ Page 1: [Plot description] | [Illustration description]
 Page 2: [Plot description] | [Illustration description]
 ...";
 
-        var response = await geminiClient.AskAsync(prompt);
+        var response = await aiServiceManager.AskAsync(prompt);
         return response;
     }
     
@@ -102,7 +102,7 @@ Page 2: [Plot description] | [Illustration description]
             var illustrationPrompt = await GenerateIllustrationPromptAsync(storyData.title, storyData.theme, pageNumber, pageText, artStyle);
             
             // 3. Generate illustration
-            var illustrations = await geminiClient.GeneratePic(illustrationPrompt, 1, "16:9");
+            var illustrations = await aiServiceManager.GeneratePic(illustrationPrompt, 1, "16:9");
             
             // 4. Update page data
             if (illustrations != null && illustrations.Length > 0)
@@ -154,7 +154,7 @@ Requirements:
 
 Please output the page text content directly, without any other explanations:";
 
-        var response = await geminiClient.AskAsync(prompt);
+        var response = await aiServiceManager.AskAsync(prompt);
         return response?.Trim() ?? $"Page {pageNumber} content";
     }
     
@@ -180,7 +180,7 @@ Requirements:
 
 Please output the illustration prompt directly:";
 
-        var response = await geminiClient.AskAsync(prompt);
+        var response = await aiServiceManager.AskAsync(prompt);
         return response?.Trim() ?? $"A beautiful illustration for page {pageNumber} of {title}";
     }
     

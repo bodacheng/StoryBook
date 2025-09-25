@@ -15,13 +15,13 @@ public class StoryDisplayProcess : MainSceneProcess
     public override async UniTask ProcessEnter()
     {
         // Initialize story generation service
-        if (SceneManager.Instance?.GeminiClient != null)
+        if (SceneManager.Instance?.AIServiceManager != null)
         {
-            storyGenerationService = new StoryGenerationService(SceneManager.Instance.GeminiClient);
+            storyGenerationService = new StoryGenerationService(SceneManager.Instance.AIServiceManager);
         }
         else
         {
-            Debug.LogError("SceneManager.Instance.GeminiClient is null! Cannot initialize story generation service.");
+            Debug.LogError("SceneManager.Instance.AIServiceManager is null! Cannot initialize story generation service.");
         }
         
         // Load display layer

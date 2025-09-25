@@ -1,37 +1,35 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class GeminiClient : IAIClient
+public class OpenAIClient : IAIClient
 {
-    private readonly GeminiConfig config;
-    private readonly Imagen4Service imagenService;
-    public Imagen4Service Imagen4Service => imagenService;
+    private readonly OpenAIConfig config;
+    private readonly DALLEService dalleService;
+    public DALLEService DALLEService => dalleService;
     
-    private const string BaseUrl = "https://generativelanguage.googleapis.com/v1beta/models";
+    private const string BaseUrl = "https://api.openai.com/v1/chat/completions";
     
-    public string ProviderName => "Gemini";
+    public string ProviderName => "OpenAI";
     public bool IsConfigured => config != null && config.IsValid();
     
-    public GeminiClient(GeminiConfig config)
+    public OpenAIClient(OpenAIConfig config)
     {
         this.config = config;
-        this.imagenService = new Imagen4Service(config);
-        Debug.Log("GeminiClient Generated:" + this.config);
+        this.dalleService = new DALLEService(config);
+        Debug.Log("OpenAIClient Generated:" + this.config);
     }
     
-    [Serializable] class Part { public string text; }
-    [Serializable] class Content { public string role = "user"; public Part[] parts; }
-    [Serializable] class RequestBody { public Content[] contents; }
-    // Response structure (only taking the part we need)
-    [Serializable] class ResponsePart { public string text; }
-    [Serializable] class ResponseContent { public ResponsePart[] parts; }
-    [Serializable] class Candidate { public ResponseContent content; }
-    [Serializable] class ResponseRoot { public Candidate[] candidates; }
+    [Serializable] class Message { public string role; public string content; }
+    [Serializable] class RequestBody { public string model; public Message[] messages; public int max_completion_tokens = 1000; }
+    [Serializable] class Choice { public Message message; }
+    [Serializable] class ResponseRoot { public Choice[] choices; }
     
     /// <summary>
-    /// Send a "question" and return Gemini's text response
+    /// Send a "question" and return OpenAI's text response
     /// </summary>
     public System.Threading.Tasks.Task<string> AskAsync(string question, int? timeoutMs = null)
     {
@@ -40,21 +38,19 @@ public class GeminiClient : IAIClient
 
         // Construct request body
         var body = new RequestBody {
-            contents = new [] {
-                new Content {
-                    role = "user",
-                    parts = new [] { new Part { text = question } }
-                }
+            model = config.TextModel,
+            messages = new [] {
+                new Message { role = "user", content = question }
             }
         };
         var json = JsonUtility.ToJson(body);
-        var url = $"{BaseUrl}/{config.Model}:generateContent?key={config.ApiKey}";
-
-        var req = new UnityWebRequest(url, "POST");
+        
+        var req = new UnityWebRequest(BaseUrl, "POST");
         byte[] raw = Encoding.UTF8.GetBytes(json);
         req.uploadHandler = new UploadHandlerRaw(raw);
         req.downloadHandler = new DownloadHandlerBuffer();
         req.SetRequestHeader("Content-Type", "application/json");
+        req.SetRequestHeader("Authorization", $"Bearer {config.ApiKey}");
         req.timeout = Mathf.CeilToInt(actualTimeout / 1000f);
 
         // Use MonoBehaviourRunner to execute coroutine
@@ -82,10 +78,10 @@ public class GeminiClient : IAIClient
         {
             var resp = JsonUtility.FromJson<ResponseRoot>(text);
             string answer = "(empty)";
-            if (resp?.candidates != null && resp.candidates.Length > 0 &&
-                resp.candidates[0].content?.parts != null && resp.candidates[0].content.parts.Length > 0)
+            if (resp?.choices != null && resp.choices.Length > 0 &&
+                resp.choices[0].message?.content != null)
             {
-                answer = resp.candidates[0].content.parts[0].text;
+                answer = resp.choices[0].message.content;
             }
             tcs.SetResult(answer);
         }
@@ -98,9 +94,9 @@ public class GeminiClient : IAIClient
     public async System.Threading.Tasks.Task<Texture2D[]> GeneratePic(string prompt, int? count = null, string aspectRatio = null)
     {
         var actualCount = count ?? config.DefaultImageCount;
-        var actualAspectRatio = aspectRatio ?? config.DefaultAspectRatio;
+        var actualSize = aspectRatio ?? config.DefaultSize;
         
-        var data = await imagenService.GenerateImagesImagenAsync(prompt, actualCount, actualAspectRatio);
+        var data = await dalleService.GenerateImagesDALLEAsync(prompt, actualCount, actualSize);
         return data;
     }
 }

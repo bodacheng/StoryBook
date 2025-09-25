@@ -3,18 +3,35 @@ using UnityEngine;
 
 public class SceneManager : MonoBehaviour
 {
-    [SerializeField] private GeminiConfig geminiConfig;
+    [SerializeField] private AIServiceConfig aiServiceConfig;
     [SerializeField] private Transform target;
     [SerializeField] private Transform fullScreen;
  
-    private GeminiClient geminiClient;
-    public GeminiClient GeminiClient => geminiClient;
+    private AIServiceManager aiServiceManager;
+    public AIServiceManager AIServiceManager => aiServiceManager;
+    
+    // Backward compatibility
+    public IAIClient GeminiClient => aiServiceManager?.CurrentClient;
     
     public static SceneManager Instance { get; set; }
     
     void Awake()
     {
-        geminiClient = new GeminiClient(geminiConfig);
+        // Initialize AI Service Manager
+        var aiServiceManagerGO = new GameObject("AIServiceManager");
+        aiServiceManager = aiServiceManagerGO.AddComponent<AIServiceManager>();
+        
+        // Set the configuration
+        if (aiServiceConfig != null)
+        {
+            aiServiceManager.ServiceConfig = aiServiceConfig;
+            Debug.Log("AI Service Manager initialized with configuration");
+        }
+        else
+        {
+            Debug.LogWarning("AI Service Config is not assigned in SceneManager");
+        }
+        
         Application.targetFrameRate = 60;
         UILayerLoader.SetHanger(target, fullScreen);
         BasicPhase();
