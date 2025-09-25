@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12345678901234567890123456789016, type: 3}
   m_Name: OpenAIConfig
   m_EditorClassIdentifier: 
-  apiKey: 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
+  apiKey: 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
   textModel: gpt-4o
   imageModel: dall-e-3
   defaultTimeoutMs: 20000
   imageTimeoutMs: 600000
   defaultImageCount: 1
-  defaultSize: 1024x1024
-  defaultQuality: standard
+  defaultSize: 1792x1024
+  defaultQuality: auto
   defaultStyle: vivid
