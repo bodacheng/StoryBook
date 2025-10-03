@@ -6,3 +6,4 @@ public enum AIModelType
     Gemini,
     OpenAI
 }
+

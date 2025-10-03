@@ -15,7 +15,8 @@ public class SceneManager : MonoBehaviour
     
     public static SceneManager Instance { get; set; }
     
-    void Awake()
+    // Start is called before the first frame update
+    void Start()
     {
         // Initialize AI Service Manager
         var aiServiceManagerGO = new GameObject("AIServiceManager");
@@ -36,11 +37,7 @@ public class SceneManager : MonoBehaviour
         UILayerLoader.SetHanger(target, fullScreen);
         BasicPhase();
         Instance = this;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
+        
         ProcessesRunner.Main.TrySwitchToStep(MainSceneStep.Title).Forget();
     }
 

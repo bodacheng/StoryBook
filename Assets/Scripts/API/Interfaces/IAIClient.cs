@@ -32,3 +32,4 @@ public interface IAIClient
     /// </summary>
     bool IsConfigured { get; }
 }
+

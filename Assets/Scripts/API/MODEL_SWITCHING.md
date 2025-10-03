@@ -263,3 +263,4 @@ The system is designed to be easily extensible:
 
 - `OnModelChanged` - Fired when model changes
 - `OnError` - Fired when errors occur
+

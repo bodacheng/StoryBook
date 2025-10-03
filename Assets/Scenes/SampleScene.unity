@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1db1895da97d54fe29ac0b7537a973c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  geminiConfig: {fileID: 11400000, guid: 7985f2eabe21a419c9fe99a9542940ee, type: 2}
+  aiServiceConfig: {fileID: 11400000, guid: 87f702a567c764520b2c2a120d1cb401, type: 2}
   target: {fileID: 20312134}
   fullScreen: {fileID: 591469706}
 --- !u!4 &14506171
